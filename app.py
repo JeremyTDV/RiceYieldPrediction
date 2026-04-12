@@ -294,10 +294,23 @@ def predict():
         cat   = classify_yield(y_val)
         tips  = generate_tips(inp, y_val, cat)
 
+        # Get rice area for the province
+        rice_areas = {
+            'cavite': 14000,
+            'laguna': 30000,
+            'batangas': 8000,
+            'rizal': 5800,
+            'quezon': 43000
+        }
+        rice_area = rice_areas.get(prov.get('id'), 0)
+        total_yield_tons = round(y_val * rice_area, 2)
+
         results.append({
             'id':       prov.get('id'),
             'name':     prov.get('name'),
             'yield':    round(y_val, 3),
+            'rice_area': rice_area,
+            'total_yield_tons': total_yield_tons,
             'category': cat,
             'inputs':   inp,
             'tips':     tips,
