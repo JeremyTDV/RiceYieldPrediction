@@ -199,6 +199,13 @@ html,body{height:100%;overflow:hidden;background:var(--ink);color:var(--text);
   border:1px solid var(--border2);border-radius:7px;
   font-family:'Unbounded',sans-serif;font-size:9px;font-weight:600;
   letter-spacing:.06em;padding:7px;cursor:pointer;transition:all .15s;}
+.ig input.error{border-color:var(--red);background:rgba(239,68,68,.08);}
+.ig input:focus.error{border-color:var(--red);box-shadow:0 0 0 2px rgba(239,68,68,.2);}
+.error-message{background:var(--red-bg);border:1px solid var(--red-bord);border-radius:var(--r);
+  color:var(--red);font-size:8.5px;padding:6px 8px;margin-top:4px;
+  display:flex;align-items:center;gap:6px;animation:slideDown 0.2s ease-out;}
+.error-message::before{content:'⚠️';font-size:10px;}
+@keyframes slideDown{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:translateY(0);}}
 .ghost-btn:hover{background:var(--ink);color:var(--text);}
 
 .prov-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:.75rem;}
@@ -524,6 +531,75 @@ html.light #tut-box{box-shadow:0 12px 40px rgba(0,0,0,.18);}
 .mob-leg-txt{font-size:9.5px;color:var(--text2);}
 .mob-leg-val{font-size:9px;color:var(--muted);margin-left:2px;}
 html.light .mobile-legend{background:var(--ink2);border-color:var(--border);}
+
+/* ── USER BADGE + LOGOUT ─────────────────────────────────────────────────── */
+.user-badge{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.user-info{display:flex;flex-direction:column;align-items:flex-end;}
+.user-name{font-size:10px;font-weight:600;color:var(--text);line-height:1.2;}
+.user-role{font-size:8.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.user-role.admin{color:var(--rice);}
+.logout-btn{background:none;border:1px solid var(--border2);border-radius:6px;
+  color:var(--text2);cursor:pointer;font-size:10px;padding:4px 9px;
+  font-family:'Instrument Sans',sans-serif;transition:all .15s;}
+.logout-btn:hover{background:var(--ink3);color:var(--text);}
+
+/* ── ADMIN PANEL OVERLAY ─────────────────────────────────────────────────── */
+#admin-overlay{
+  position:fixed;inset:0;z-index:9500;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+#admin-overlay.open{display:flex;}
+#admin-panel{
+  background:var(--ink2);border:1px solid var(--border2);
+  border-radius:14px;padding:28px 28px 24px;
+  width:100%;max-width:440px;
+  box-shadow:0 24px 64px rgba(0,0,0,.6);
+}
+.ap-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.ap-title{font-family:'Unbounded',sans-serif;font-size:13px;font-weight:700;color:#fff;}
+.ap-close{background:none;border:none;color:var(--text2);cursor:pointer;
+  font-size:16px;padding:3px 8px;border-radius:5px;transition:background .15s;}
+.ap-close:hover{background:var(--ink3);color:var(--text);}
+.ap-sec{font-family:'Unbounded',sans-serif;font-size:8px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.2em;color:var(--muted);
+  margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.ap-sec::after{content:'';flex:1;height:1px;background:var(--border);}
+.ap-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
+.ap-field{display:flex;flex-direction:column;gap:4px;}
+.ap-field label{font-size:8.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--text2);}
+.ap-field input{
+  background:var(--ink3);border:1px solid var(--border2);border-radius:6px;
+  color:var(--text);font-family:'Instrument Sans',sans-serif;font-size:13px;
+  padding:7px 10px;outline:none;width:100%;transition:border-color .2s;
+}
+.ap-field input:focus{border-color:rgba(212,168,67,.6);}
+.ap-field .ap-hint{font-size:8px;color:var(--muted);}
+.ap-save{
+  width:100%;background:var(--rice);color:#0d1117;border:none;border-radius:8px;
+  font-family:'Unbounded',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:.06em;padding:11px;cursor:pointer;transition:opacity .2s;
+}
+.ap-save:hover{opacity:.88;}
+.ap-msg{font-size:11px;margin-top:10px;padding:8px 11px;border-radius:7px;
+  display:none;text-align:center;}
+.ap-msg.ok{display:block;background:var(--green-bg);color:#86efac;border:1px solid var(--green-bord);}
+.ap-msg.err{display:block;background:var(--red-bg);color:#fca5a5;border:1px solid var(--red-bord);}
+
+/* Admin button in topbar */
+#admin-btn{
+  background:rgba(212,168,67,.12);border:1px solid rgba(212,168,67,.35);
+  border-radius:6px;color:var(--rice);cursor:pointer;
+  font-family:'Unbounded',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.06em;padding:5px 11px;transition:all .15s;flex-shrink:0;
+}
+#admin-btn:hover{background:rgba(212,168,67,.2);}
+
+@media(max-width:540px){
+  .user-info{display:none;}
+  #admin-panel{padding:22px 18px 20px;}
+  .ap-grid{grid-template-columns:1fr;}
+}
 @keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 .fade-up{animation:fadeUp .3s ease forwards;}
 </style>
@@ -540,6 +616,16 @@ html.light .mobile-legend{background:var(--ink2);border-color:var(--border);}
       </div>
     </div>
     <div class="topbar-right">
+    <div id="admin-btn-wrap" style="display:none;">
+      <button id="admin-btn" onclick="openAdmin()">⚙ Admin</button>
+    </div>
+    <div class="user-badge">
+      <div class="user-info">
+        <span class="user-name" id="topbar-username"></span>
+        <span class="user-role" id="topbar-role"></span>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Sign out</button>
+    </div>
     <button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode"><span class="tog-icon">🌙</span><span id="tog-label">Dark</span></button>
     <div class="top-pills">
       <span class="pill gold" id="pill-r2">Loading model…</span>
@@ -654,6 +740,50 @@ html.light .mobile-legend{background:var(--ink2);border-color:var(--border);}
     </div>
   </div>
 
+
+<!-- ── ADMIN PANEL ──────────────────────────────────────────────────── -->
+<div id="admin-overlay">
+  <div id="admin-panel">
+    <div class="ap-hd">
+      <div class="ap-title">⚙ Admin Settings</div>
+      <button class="ap-close" onclick="closeAdmin()">✕</button>
+    </div>
+    <div class="ap-sec">Rice Area per Province (ha)</div>
+    <div class="ap-grid">
+      <div class="ap-field">
+        <label>Cavite</label>
+        <input type="number" id="ap-cavite" min="0" step="100">
+        <div class="ap-hint">Harvested rice area in hectares</div>
+      </div>
+      <div class="ap-field">
+        <label>Laguna</label>
+        <input type="number" id="ap-laguna" min="0" step="100">
+        <div class="ap-hint">Harvested rice area in hectares</div>
+      </div>
+      <div class="ap-field">
+        <label>Batangas</label>
+        <input type="number" id="ap-batangas" min="0" step="100">
+        <div class="ap-hint">Harvested rice area in hectares</div>
+      </div>
+      <div class="ap-field">
+        <label>Rizal</label>
+        <input type="number" id="ap-rizal" min="0" step="100">
+        <div class="ap-hint">Harvested rice area in hectares</div>
+      </div>
+      <div class="ap-field">
+        <label>Quezon</label>
+        <input type="number" id="ap-quezon" min="0" step="100">
+        <div class="ap-hint">Harvested rice area in hectares</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:.85rem;">
+      <button class="ap-save" onclick="saveAdminSettings()" style="flex:1;">💾 Save Changes</button>
+      <button class="ap-reset" onclick="resetAdminSettings()" style="flex:1;background:rgba(239,68,68,.2);color:#ef4444;border:1px solid rgba(239,68,68,.4);font-family:'Unbounded',sans-serif;font-size:9px;font-weight:700;letter-spacing:.06em;padding:11px;border-radius:var(--r);cursor:pointer;transition:opacity .2s;">🔄 Reset to Default</button>
+    </div>
+    <div class="ap-msg" id="ap-msg"></div>
+  </div>
+</div>
+
 <!-- ── TUTORIAL OVERLAY ──────────────────────────────────────────────────── -->
 <div id="tut-backdrop"></div>
 <div id="tut-box">
@@ -688,7 +818,10 @@ const CAT_BORD = {high:'var(--green-bord)', moderate:'var(--yellow-bord)', low:'
 const state = {results:{}, thresholds:{low:4.4, high:5.25}};
 
 // Inject model stats from Flask
-const MODEL_STATS = {{ stats|safe }};
+const MODEL_STATS  = {{ stats|safe }};
+const CURRENT_ROLE = "{{ role }}";
+const CURRENT_USER = "{{ username }}";
+const SERVER_RICE_AREAS = {{ rice_areas|safe }};
 (s=>{
   document.getElementById('s-r2').textContent   = s.r2.toFixed(4);
   document.getElementById('s-mse').textContent  = s.mse.toFixed(4);
@@ -738,6 +871,9 @@ function setTab(id){
   });
 }
 function applyGlobal(){
+  if(!validateGlobalInputs()){
+    return;
+  }
   const t=document.getElementById('g-temp').value,r=document.getElementById('g-rain').value,
         m=document.getElementById('g-moist').value,f=document.getElementById('g-fert').value,
         d=document.getElementById('g-disease').value;
@@ -926,8 +1062,75 @@ function openTips(provId){
 }
 function closeTips(){document.getElementById('tips-drawer').classList.remove('open');}
 
+// Validation functions
+function clearErrors(){
+  document.querySelectorAll('.error').forEach(el=>el.classList.remove('error'));
+  document.querySelectorAll('.error-message').forEach(el=>el.remove());
+}
+
+function showError(inputId, message){
+  const input = document.getElementById(inputId);
+  if(!input) return;
+  input.classList.add('error');
+  const existingError = input.parentElement.querySelector('.error-message');
+  if(existingError) existingError.remove();
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'error-message';
+  errorDiv.textContent = message;
+  input.parentElement.appendChild(errorDiv);
+}
+
+function validateInputs(){
+  clearErrors();
+  let isValid = true;
+  const activeCard = document.querySelector('.input-card.active');
+  if(!activeCard){
+    showError('runBtn', 'Please select a province tab');
+    return false;
+  }
+  const provinceId = activeCard.id.replace('card-', '');
+  const fields = [
+    {id: `${provinceId}-temp`, name: 'Temperature', required: true},
+    {id: `${provinceId}-rain`, name: 'Rainfall', required: true},
+    {id: `${provinceId}-moist`, name: 'Soil Moisture', required: true},
+    {id: `${provinceId}-fert`, name: 'Fertilizer', required: true},
+    {id: `${provinceId}-disease`, name: 'Disease Severity', required: true}
+  ];
+  fields.forEach(field=>{
+    const input = document.getElementById(field.id);
+    if(!input || input.value.trim() === '' || isNaN(parseFloat(input.value))){
+      showError(field.id, `${field.name} is required`);
+      isValid = false;
+    }
+  });
+  return isValid;
+}
+
+function validateGlobalInputs(){
+  clearErrors();
+  let isValid = true;
+  const fields = [
+    {id: 'g-temp', name: 'Temperature'},
+    {id: 'g-rain', name: 'Rainfall'},
+    {id: 'g-moist', name: 'Soil Moisture'},
+    {id: 'g-fert', name: 'Fertilizer'},
+    {id: 'g-disease', name: 'Disease Severity'}
+  ];
+  fields.forEach(field=>{
+    const input = document.getElementById(field.id);
+    if(!input || input.value.trim() === '' || isNaN(parseFloat(input.value))){
+      showError(field.id, `${field.name} is required`);
+      isValid = false;
+    }
+  });
+  return isValid;
+}
+
 // Run prediction
 async function runPrediction(){
+  if(!validateInputs()){
+    return;
+  }
   const btn=document.getElementById('runBtn');
   btn.classList.add('loading');btn.disabled=true;
   const payload={provinces:PROVINCES.map(p=>({
@@ -1262,6 +1465,119 @@ if(document.readyState === 'loading'){
   // DOM already ready
   tutInit();
 }
+
+
+// ── Auth & Admin ──────────────────────────────────────────────────────────────
+(function initAuth(){
+  // Set user info in topbar
+  document.getElementById('topbar-username').textContent = CURRENT_USER;
+  const roleEl = document.getElementById('topbar-role');
+  roleEl.textContent = CURRENT_ROLE === 'admin' ? '🔑 Admin' : '👤 User';
+  if(CURRENT_ROLE === 'admin') roleEl.classList.add('admin');
+
+  // Show admin button only for admins
+  if(CURRENT_ROLE === 'admin'){
+    document.getElementById('admin-btn-wrap').style.display = 'block';
+  }
+
+  // Populate admin fields with current server values
+  if(SERVER_RICE_AREAS){
+    ['cavite','laguna','batangas','rizal','quezon'].forEach(p => {
+      const el = document.getElementById('ap-' + p);
+      if(el && SERVER_RICE_AREAS[p] !== undefined) el.value = SERVER_RICE_AREAS[p];
+    });
+  }
+})();
+
+async function doLogout(){
+  await fetch('/api/logout', {method:'POST'});
+  window.location.href = '/login';
+}
+
+function openAdmin(){
+  document.getElementById('admin-overlay').classList.add('open');
+}
+function closeAdmin(){
+  document.getElementById('admin-overlay').classList.remove('open');
+  document.getElementById('ap-msg').className = 'ap-msg';
+}
+
+async function saveAdminSettings(){
+  const provinces = ['cavite','laguna','batangas','rizal','quezon'];
+  const payload   = {};
+  for(const p of provinces){
+    const el  = document.getElementById('ap-' + p);
+    const val = parseInt(el.value);
+    if(isNaN(val) || val <= 0){
+      showApMsg('Invalid value for ' + p + '. Must be a positive number (greater than 0).', false);
+      return;
+    }
+    payload[p] = val;
+  }
+
+  try{
+    const res  = await fetch('/api/admin/rice-areas', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if(res.ok){
+      showApMsg('✓ Rice areas updated successfully. Re-run analysis to apply changes.', true);
+      // Update PROVINCES riceArea values in memory
+      PROVINCES.forEach(p => {
+        if(data.current[p.id] !== undefined){
+          p.riceArea = data.current[p.id];
+        }
+      });
+    } else {
+      showApMsg(data.error || 'Failed to save.', false);
+    }
+  } catch(e){
+    showApMsg('Could not connect to server.', false);
+  }
+}
+
+async function resetAdminSettings(){
+  if(!confirm('Reset rice areas to default values? This will overwrite all current settings.')){
+    return;
+  }
+
+  try{
+    const res  = await fetch('/api/admin/rice-areas/reset', {
+      method:'POST', headers:{'Content-Type':'application/json'}
+    });
+    const data = await res.json();
+    if(res.ok){
+      showApMsg('✓ Rice areas reset to default values. Re-run analysis to apply changes.', true);
+      // Update form inputs with default values
+      for(const [prov, val] of Object.entries(data.current)){
+        const el = document.getElementById('ap-' + prov);
+        if(el) el.value = val;
+      }
+      // Update PROVINCES riceArea values in memory
+      PROVINCES.forEach(p => {
+        if(data.current[p.id] !== undefined){
+          p.riceArea = data.current[p.id];
+        }
+      });
+    } else {
+      showApMsg(data.error || 'Failed to reset.', false);
+    }
+  } catch(e){
+    showApMsg('Could not connect to server.', false);
+  }
+}
+
+function showApMsg(msg, ok){
+  const el = document.getElementById('ap-msg');
+  el.textContent = msg;
+  el.className   = 'ap-msg ' + (ok ? 'ok' : 'err');
+}
+
+// Close admin overlay on backdrop click
+document.getElementById('admin-overlay').addEventListener('click', function(e){
+  if(e.target === this) closeAdmin();
+});
 
 // ── Theme toggle ──────────────────────────────────────────────────────────────
 const TILE_DARK  = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
