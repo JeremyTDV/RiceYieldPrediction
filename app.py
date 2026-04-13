@@ -70,7 +70,7 @@ data['disease_severity'] = data['disease_severity'].clip(0, 5)  # Ensure values 
 disease_penalty = 0.12  # Each unit of disease severity reduces yield by 12%
 data['yield_tons_ha'] = data['yield_tons_ha'] * (1 - data['disease_severity'] * disease_penalty)
 
-X = data[['avg_temp', 'rainfall_mm', 'soil_moisture', 'fertilizer_kg_ha', 'disease_severity']]
+X = data[['avg_temp', 'rainfall_mm', 'soil_moisture', 'fertilizer_kg_ha', 'rice_area', 'disease_severity']]
 y = data['yield_tons_ha']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -281,28 +281,29 @@ def predict():
     provinces = body.get('provinces', [])
     results = []
 
+    # Get rice area for the province
+    rice_areas = {
+        'cavite': 14000,
+        'laguna': 30000,
+        'batangas': 8000,
+        'rizal': 5800,
+        'quezon': 43000
+    }
+
     for prov in provinces:
+        rice_area = rice_areas.get(prov.get('id'), 0)
         inp = {
             'avg_temp':         float(prov.get('avg_temp',         27.5)),
             'rainfall_mm':      float(prov.get('rainfall_mm',      2100)),
             'soil_moisture':    float(prov.get('soil_moisture',    65)),
             'fertilizer_kg_ha': float(prov.get('fertilizer_kg_ha', 150)),
+            'rice_area':        float(prov.get('rice_area',        rice_area)),
             'disease_severity': int(prov.get('disease_severity', 2)),
         }
         df    = pd.DataFrame([inp])
         y_val = float(model.predict(df)[0])
         cat   = classify_yield(y_val)
         tips  = generate_tips(inp, y_val, cat)
-
-        # Get rice area for the province
-        rice_areas = {
-            'cavite': 14000,
-            'laguna': 30000,
-            'batangas': 8000,
-            'rizal': 5800,
-            'quezon': 43000
-        }
-        rice_area = rice_areas.get(prov.get('id'), 0)
         total_yield_tons = round(y_val * rice_area, 2)
 
         results.append({
