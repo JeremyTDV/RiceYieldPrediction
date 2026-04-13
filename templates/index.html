@@ -24,15 +24,135 @@ html,body{height:100%;overflow:hidden;background:var(--ink);color:var(--text);
   font-family:'Instrument Sans',sans-serif;font-size:14px;line-height:1.5;}
 #app{display:grid;grid-template-rows:54px 1fr;height:100vh;overflow:hidden;}
 #main{display:grid;grid-template-columns:370px 1fr;overflow:hidden;}
+/* ── TABLET (≤860px) ──────────────────────────────────────────────────────── */
 @media(max-width:860px){
-  #main{grid-template-columns:1fr;grid-template-rows:auto 1fr;}
-  #sidebar{max-height:52vh;order:2;}
-  #map-panel{order:1;min-height:48vh;}
+  #main{grid-template-columns:1fr;grid-template-rows:1fr auto;overflow:hidden;}
+  #map-panel{order:1;min-height:52vh;}
+  #sidebar{order:2;max-height:48vh;border-right:none;border-top:1px solid var(--border);}
+  .top-pills{display:none;}  /* hide pills on tablet to save space */
+}
+
+/* ── MOBILE (≤540px) ──────────────────────────────────────────────────────── */
+@media(max-width:540px){
+
+  /* App shell — full scrollable page instead of fixed viewport */
+  html,body{height:auto;overflow:auto;}
+  #app{display:flex;flex-direction:column;height:auto;min-height:100vh;}
+  #main{display:flex;flex-direction:column;overflow:visible;align-items:stretch;}
+
+  /* Topbar — tighter, single row */
+  #topbar{padding:0 .9rem;gap:.6rem;height:50px;flex-shrink:0;}
+  .topbar-right{gap:6px;flex-shrink:0;}
+  .top-pills{display:none!important;}
+  .brand-sub{display:none;}
+  .brand-name{font-size:9.5px;}
+  .top-pills{display:none;}
+  #theme-toggle{padding:4px 9px;font-size:10px;}
+  #theme-toggle .tog-icon{font-size:12px;}
+
+  /* Map — fixed height on mobile */
+  #map-panel{order:1;height:55vw;min-height:220px;max-height:320px;flex-shrink:0;}
+  #map{height:100%;}
+
+  /* Sidebar — full width, natural height, scrollable */
+  #sidebar{order:2;max-height:none;height:auto;overflow:visible;border-top:1px solid var(--border);border-right:none;}
+  .sb-scroll{overflow-y:visible;height:auto;padding:.9rem 1rem;}
+
+  /* Input grid — single column on small screens */
+  .g-grid{grid-template-columns:1fr;}
+  .ic-grid{grid-template-columns:1fr;}
+
+  /* Province tabs — horizontal scroll */
+  .prov-tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;
+    scrollbar-width:none;-ms-overflow-style:none;}
+  .prov-tabs::-webkit-scrollbar{display:none;}
+  .ptab{flex-shrink:0;}
+
+  /* Stats strip — smaller font */
+  .sc .sv{font-size:11px;}
+  .sc .sl{font-size:7.5px;}
+  .sc{padding:.5rem .6rem;}
+
+  /* Results & threshold strips */
+  .thresh-strip{grid-template-columns:repeat(3,1fr);}
+  .ts .tv{font-size:11px;}
+  .ts .tl{font-size:7.5px;}
+
+  /* Tips drawer — full height, separate scroll */
+  #tips-drawer{max-height:none;}
+  #tips-drawer.open{max-height:none;}
+  .tips-scroll{max-height:60vh;overflow-y:auto;}
+
+  /* Map legend — hide floating version, show inline version below map */
+  .map-legend{display:none;}
+  .mobile-legend{display:flex!important;}
+
+  /* Hover card — hide on mobile (use tap/popup instead) */
+  .hover-card{display:none;}
+
+  /* Map watermark */
+  .map-wm{display:none;}
+
+  /* Popup — full width on mobile */
+  .leaflet-popup-content-wrapper{min-width:0!important;}
+  .leaflet-popup-content{min-width:220px!important;}
+  .pop-y-val{font-size:20px;}
+
+  /* Tutorial — bottom sheet on mobile */
+  #tut-backdrop{background:rgba(0,0,0,.55);}
+  #tut-box{
+    position:fixed!important;
+    bottom:0!important;top:auto!important;
+    left:0!important;right:0!important;
+    width:100%!important;
+    transform:none!important;
+    border-radius:18px 18px 0 0!important;
+    padding:20px 20px 28px!important;
+    max-height:70vh;overflow-y:auto;
+    transition:bottom .35s cubic-bezier(.16,1,.3,1)!important;
+  }
+  /* drag handle visual */
+  #tut-box::before{
+    content:'';display:block;
+    width:36px;height:4px;border-radius:2px;
+    background:var(--border2);
+    margin:0 auto 14px;
+  }
+  .tut-footer{flex-wrap:wrap;gap:8px;}
+  .tut-btn-row{width:100%;}
+  .tut-btn{flex:1;text-align:center;padding:10px;}
+  .tut-dots{width:100%;justify-content:center;order:-1;margin-bottom:4px;}
+
+  /* Help button — smaller, above map */
+  #tut-help-btn{width:32px;height:32px;font-size:13px;bottom:14px;right:14px;}
+
+  /* Run button — bigger tap target */
+  .run-btn{padding:14px;font-size:11px;}
+
+  /* Inputs — bigger tap target */
+  .ig input{padding:8px 10px;font-size:13px;}
+  .ig label{font-size:9px;}
+
+  /* Section headers */
+  .sec-hd{font-size:8px;letter-spacing:.15em;}
+
+  /* Ghost button */
+  .ghost-btn{padding:9px;font-size:9px;}
+}
+
+/* ── VERY SMALL (≤380px) ──────────────────────────────────────────────────── */
+@media(max-width:380px){
+  .brand-name{font-size:8.5px;}
+  #theme-toggle span:last-child{display:none;} /* hide "Dark"/"Light" label, keep icon */
+  .sc .sv{font-size:10px;}
 }
 
 /* TOP BAR */
+
+.topbar-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.brand{min-width:0;flex-shrink:1;}
 #topbar{background:var(--ink2);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;gap:1rem;z-index:1000;}
+  display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;gap:1rem;z-index:1000;overflow:hidden;}
 .brand{display:flex;align-items:center;gap:10px;}
 .brand-icon{width:32px;height:32px;border-radius:7px;
   background:linear-gradient(135deg,var(--rice),#9a6e20);
@@ -159,7 +279,7 @@ html,body{height:100%;overflow:hidden;background:var(--ink);color:var(--text);
 
 /* MAP */
 #map-panel{position:relative;flex:1;display:flex;flex-direction:column;}
-#map{flex:1;background:#0a0d12;}
+#map{flex:1;min-height:0;background:#0a0d12;}
 
 #map-loader{position:absolute;inset:0;background:rgba(13,17,23,.8);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -390,6 +510,20 @@ html.light #tut-box{box-shadow:0 12px 40px rgba(0,0,0,.18);}
   align-items:center;justify-content:center;
 }
 #tut-help-btn:hover{transform:scale(1.1);}
+
+/* ── MOBILE INLINE LEGEND (shown only on mobile) ─────────────────────────── */
+.mobile-legend{
+  display:none;  /* hidden on desktop — shown via media query override above */
+  align-items:center;justify-content:space-around;
+  background:var(--ink2);border-bottom:1px solid var(--border);
+  padding:7px 12px;gap:6px;flex-wrap:wrap;flex-shrink:0;
+  order:2;
+}
+.mob-leg-item{display:flex;align-items:center;gap:5px;}
+.mob-leg-sw{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.mob-leg-txt{font-size:9.5px;color:var(--text2);}
+.mob-leg-val{font-size:9px;color:var(--muted);margin-left:2px;}
+html.light .mobile-legend{background:var(--ink2);border-color:var(--border);}
 @keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 .fade-up{animation:fadeUp .3s ease forwards;}
 </style>
@@ -405,7 +539,7 @@ html.light #tut-box{box-shadow:0 12px 40px rgba(0,0,0,.18);}
         <div class="brand-sub">Rice Yield Prediction System · Region IV-A · Philippines</div>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;">
+    <div class="topbar-right">
     <button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode"><span class="tog-icon">🌙</span><span id="tog-label">Dark</span></button>
     <div class="top-pills">
       <span class="pill gold" id="pill-r2">Loading model…</span>
@@ -494,6 +628,29 @@ html.light #tut-box{box-shadow:0 12px 40px rgba(0,0,0,.18);}
       </div>
       <div class="hover-card" id="hoverCard"></div>
       <div class="map-wm">AGRI-GIS · REGION IV-A · GADM 4.1</div>
+    </div>
+
+    <!-- Mobile inline legend — shown below map on small screens -->
+    <div class="mobile-legend" id="mobileLegend">
+      <div class="mob-leg-item">
+        <div class="mob-leg-sw" style="background:var(--green)"></div>
+        <span class="mob-leg-txt">High</span>
+        <span class="mob-leg-val" id="mob-leg-hi">≥ — t/ha</span>
+      </div>
+      <div class="mob-leg-item">
+        <div class="mob-leg-sw" style="background:var(--yellow)"></div>
+        <span class="mob-leg-txt">Moderate</span>
+        <span class="mob-leg-val" id="mob-leg-mo">—–— t/ha</span>
+      </div>
+      <div class="mob-leg-item">
+        <div class="mob-leg-sw" style="background:var(--red)"></div>
+        <span class="mob-leg-txt">Low</span>
+        <span class="mob-leg-val" id="mob-leg-lo">&lt; — t/ha</span>
+      </div>
+      <div class="mob-leg-item">
+        <div class="mob-leg-sw" style="background:var(--muted)"></div>
+        <span class="mob-leg-txt" style="color:var(--muted)">Not analysed</span>
+      </div>
     </div>
   </div>
 
@@ -792,6 +949,13 @@ async function runPrediction(){
     document.getElementById('leg-hi').textContent=`≥ ${high.toFixed(2)} t/ha`;
     document.getElementById('leg-mo').textContent=`${low.toFixed(2)}–${high.toFixed(2)} t/ha`;
     document.getElementById('leg-lo').textContent=`< ${low.toFixed(2)} t/ha`;
+    // Sync mobile inline legend
+    const mhi=document.getElementById('mob-leg-hi');
+    const mmo=document.getElementById('mob-leg-mo');
+    const mlo=document.getElementById('mob-leg-lo');
+    if(mhi) mhi.textContent=`≥ ${high.toFixed(2)} t/ha`;
+    if(mmo) mmo.textContent=`${low.toFixed(2)}–${high.toFixed(2)} t/ha`;
+    if(mlo) mlo.textContent=`< ${low.toFixed(2)} t/ha`;
     data.results.forEach(r=>{state.results[r.id]=r;});
     renderResults(data.results);
     refreshStyles();
@@ -938,10 +1102,37 @@ function tutHighlight(selector){
   if(el){ el.classList.add('tut-highlight'); tutPrevTarget = selector; }
 }
 
+function isMobile(){ return window.innerWidth <= 540; }
+
+function tutScrollToTarget(targetSel){
+  if(!targetSel || !isMobile()) return;
+  const el = document.querySelector(targetSel);
+  if(!el) return;
+  // Scroll so element is visible above the bottom sheet (~240px tall)
+  const r = el.getBoundingClientRect();
+  const sheetH = 260;
+  const visibleH = window.innerHeight - sheetH;
+  if(r.top < 0 || r.bottom > visibleH){
+    const scrollTarget = window.scrollY + r.top - visibleH/2 + r.height/2;
+    window.scrollTo({top: Math.max(0, scrollTarget), behavior:'smooth'});
+  }
+}
+
 function tutPosition(targetSel, pos){
   const box = document.getElementById('tut-box');
   const pad = 18;
 
+  // On mobile — CSS bottom sheet handles all positioning
+  if(isMobile()){
+    // Clear any JS-set inline styles so CSS takes over
+    box.style.top = '';
+    box.style.left = '';
+    box.style.transform = '';
+    tutScrollToTarget(targetSel);
+    return;
+  }
+
+  // Desktop positioning (unchanged)
   if(pos === 'center' || !targetSel){
     box.style.top  = '50%';
     box.style.left = '50%';
@@ -954,30 +1145,29 @@ function tutPosition(targetSel, pos){
   if(!el){ box.style.top='50%';box.style.left='50%';box.style.transform='translate(-50%,-50%)';return; }
 
   const r   = el.getBoundingClientRect();
-  const bw  = 300; // box width
-  const bh  = 200; // estimated box height
+  const bw  = 300;
+  const bh  = 220;
   const vw  = window.innerWidth;
   const vh  = window.innerHeight;
 
   if(pos === 'right'){
     let left = r.right + pad;
     let top  = r.top + r.height/2 - bh/2;
-    if(left + bw > vw - pad) left = r.left - bw - pad;  // flip left
+    if(left + bw > vw - pad) left = r.left - bw - pad;
     top = Math.max(pad, Math.min(top, vh - bh - pad));
     box.style.top  = top + 'px';
     box.style.left = left + 'px';
   } else if(pos === 'right-top'){
-    // Anchor to top of target, positioned to the right
     let left = r.right + pad;
     let top  = r.top + pad;
-    if(left + bw > vw - pad) left = r.left - bw - pad;  // flip left
+    if(left + bw > vw - pad) left = r.left - bw - pad;
     top = Math.max(pad, Math.min(top, vh - bh - pad));
     box.style.top  = top + 'px';
     box.style.left = left + 'px';
   } else if(pos === 'left'){
     let left = r.left - bw - pad;
     let top  = r.top + r.height/2 - bh/2;
-    if(left < pad) left = r.right + pad;  // flip right
+    if(left < pad) left = r.right + pad;
     top = Math.max(pad, Math.min(top, vh - bh - pad));
     box.style.top  = top + 'px';
     box.style.left = left + 'px';
