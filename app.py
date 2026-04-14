@@ -21,15 +21,13 @@ USERS = {
 
 # ── Mutable constants (admin can change these) ────────────────────────────────
 # Rice area harvested per province (ha) — PSA/NAMRIA source
-DEFAULT_RICE_AREAS = {
+RICE_AREAS = {
     'cavite':   14000,
     'laguna':   30000,
     'batangas':  8000,
     'rizal':     5800,
     'quezon':   43000,
 }
-
-RICE_AREAS = DEFAULT_RICE_AREAS.copy()
 
 # ── Auth helpers ──────────────────────────────────────────────────────────────
 def login_required(f):
@@ -243,20 +241,13 @@ def update_rice_areas():
         if prov_id in body:
             try:
                 val = int(body[prov_id])
-                if val <= 0:
-                    return jsonify({'error': f'Rice area for {prov_id} must be a positive number (greater than 0)'}), 400
+                if val < 0:
+                    return jsonify({'error': f'Rice area for {prov_id} must be positive'}), 400
                 RICE_AREAS[prov_id] = val
                 updated[prov_id] = val
             except (ValueError, TypeError):
                 return jsonify({'error': f'Invalid value for {prov_id}'}), 400
     return jsonify({'ok': True, 'updated': updated, 'current': RICE_AREAS})
-
-@app.route('/api/admin/rice-areas/reset', methods=['POST'])
-@admin_required
-def reset_rice_areas():
-    global RICE_AREAS
-    RICE_AREAS = DEFAULT_RICE_AREAS.copy()
-    return jsonify({'ok': True, 'message': 'Rice areas reset to default values', 'current': RICE_AREAS})
 
 
 # ── Main routes ───────────────────────────────────────────────────────────────
