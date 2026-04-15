@@ -8,12 +8,17 @@ A full-stack web GIS application that uses a trained **Random Forest** model to 
 
 ```
 rice_app/
-├── app.py                  # Flask backend — trains model, serves API
-├── combined_rice_data.csv  # Training dataset (1985–2024)
-├── requirements.txt        # Python dependencies
-├── Procfile                # For Heroku / Railway deployment
+├── app.py                      # Flask backend — trains model, serves API, auth, admin
+├── calabarzon_rice_dataset.csv # Training dataset (processed)
+├── combined_rice_data.csv      # Source historical data (1985–2024)
+├── compress_geojson.py         # GeoJSON compression utility
+├── requirements.txt            # Python dependencies
+├── Procfile                    # For Render / Railway deployment
+├── static/
+│   └── calabarzon.geojson[.gz] # CALABARZON map (gzip-compressed)
 ├── templates/
-│   └── index.html          # Full GIS frontend (Leaflet + custom UI)
+│   ├── index.html              # Main GIS dashboard (Leaflet + custom UI)
+│   └── login.html              # Login page
 └── README.md
 ```
 
@@ -36,7 +41,11 @@ python app.py
 http://localhost:5000
 ```
 
-The model trains automatically on startup (~2 seconds). No pre-training step needed.
+You will be redirected to a login page. The model trains automatically on startup (~2 seconds).
+
+**Demo credentials:**
+- Admin: `admin` / `admin123`
+- User: `user` / `user123`
 
 ---
 
@@ -44,7 +53,7 @@ The model trains automatically on startup (~2 seconds). No pre-training step nee
 
 ### Option A — Render (recommended, free tier)
 
-1. Push the `rice_app/` folder to a GitHub repository
+1. Push the folder to a GitHub repository
 2. Go to [render.com](https://render.com) → New → Web Service
 3. Connect your GitHub repo
 4. Set these values:
@@ -84,8 +93,48 @@ heroku open
 
 ## API Endpoints
 
-### `POST /api/predict`
-Accepts province-level environmental inputs, returns yield predictions with tips.
+### Authentication
+
+#### `POST /api/login`
+Authenticate user with credentials.
+
+**Request body:**
+```json
+{
+  "username": "admin",
+  "password": "admin123"
+}
+```
+
+#### `POST /api/logout`
+Log out the current user.
+
+#### `GET /api/me`
+Check logged-in status and user details.
+
+### Admin Endpoints
+
+#### `GET /api/admin/rice-areas`
+Retrieve current rice cultivation areas (hectares) per province.
+
+#### `POST /api/admin/rice-areas`
+Update rice cultivation areas for one or more provinces.
+
+**Request body:**
+```json
+{
+  "cavite": 15000,
+  "laguna": 32000
+}
+```
+
+#### `POST /api/admin/rice-areas/reset`
+Reset rice areas to default values.
+
+### Prediction Endpoints
+
+#### `POST /api/predict`
+Accepts province-level environmental inputs, returns yield predictions with tips. Requires login.
 
 **Request body:**
 ```json
@@ -97,7 +146,8 @@ Accepts province-level environmental inputs, returns yield predictions with tips
       "avg_temp": 27.5,
       "rainfall_mm": 2100,
       "soil_moisture": 65,
-      "fertilizer_kg_ha": 150
+      "fertilizer_kg_ha": 150,
+      "disease_severity": 2
     }
   ]
 }
@@ -111,6 +161,8 @@ Accepts province-level environmental inputs, returns yield predictions with tips
       "id": "cavite",
       "name": "Cavite",
       "yield": 5.23,
+      "rice_area": 14000,
+      "total_yield_tons": 73220,
       "category": "high",
       "inputs": { ... },
       "tips": [
@@ -118,7 +170,7 @@ Accepts province-level environmental inputs, returns yield predictions with tips
           "icon": "✓",
           "type": "success",
           "title": "Excellent growing conditions",
-          "body": "..."
+          "body": "Predicted yield of 5.23 t/ha is in the top tier. Maintain current practices."
         }
       ]
     }
@@ -128,8 +180,8 @@ Accepts province-level environmental inputs, returns yield predictions with tips
 }
 ```
 
-### `GET /api/stats`
-Returns model performance metrics and feature importances.
+#### `GET /api/stats`
+Returns model performance metrics, feature importances, and dataset statistics. Requires login.
 
 ---
 
@@ -150,22 +202,52 @@ Thresholds are computed dynamically from the dataset's **33rd and 66th percentil
 | Parameter | Value |
 |-----------|-------|
 | Algorithm | Random Forest Regressor |
-| Trees | 100 (`n_estimators=100`) |
+| Estimators | 200 |
+| Max Depth | 15 |
+| Min Samples Split | 5 |
+| Min Samples Leaf | 2 |
 | Train/Test split | 80% / 20% |
 | Random state | 42 |
-| Features | Temperature, Rainfall, Soil Moisture, Fertilizer |
+| Features | Avg Temperature, Rainfall, Soil Moisture, Fertilizer, Rice Area, Disease Severity |
 | Target | Yield (tons/hectare) |
 
 ---
 
-## Feature Importance (approximate)
+## Features & Disease Severity
 
-| Feature | Importance |
-|---------|-----------|
-| Fertilizer (kg/ha) | ~52% |
-| Rainfall (mm) | ~22% |
-| Soil Moisture (%) | ~15% |
-| Avg Temperature (°C) | ~11% |
+### Input Features
+
+| Feature | Description | Unit |
+|---------|-------------|------|
+| Avg Temperature | Mean temperature during growing season | °C |
+| Rainfall | Cumulative precipitation during season | mm |
+| Soil Moisture | Volumetric water content in soil | % |
+| Fertilizer | Application rate | kg/ha |
+| Rice Area | Cultivated area for the province | hectares |
+| Disease Severity | Calculated from rainfall & soil moisture | 0–5 scale |
+
+### Disease Severity Calculation
+
+Disease severity is derived from environmental conditions:
+- **Formula:** `(rainfall_norm × 0.6 + soil_moisture_norm × 0.4) × 5`, then rounded to integer 0–5
+- **Impact:** Yield is penalized by 12% per severity level
+- **0 = No disease** → minimal penalty  
+- **5 = Critical outbreak** → severe yield reduction (60% penalty)
+
+### Feature Importance (from model training)
+
+Based on the trained Random Forest model, the following features ranked by importance:
+
+| Feature | Importance | Percentage |
+|---------|-----------|-----------|
+| Fertilizer (kg/ha) | 0.4992 | 49.92% |
+| Disease Severity | 0.2331 | 23.31% |
+| Soil Moisture (%) | 0.1452 | 14.52% |
+| Rainfall (mm) | 0.0769 | 7.69% |
+| Avg Temperature (°C) | 0.0359 | 3.59% |
+| Rice Area (ha) | 0.0096 | 0.96% |
+
+Fertilizer application is the most predictive factor for rice yield, followed by disease severity. Environmental conditions (rainfall, soil moisture, temperature) have significant but secondary influence. Rice cultivated area has minimal impact on per-hectare yield.
 
 ---
 
@@ -177,6 +259,8 @@ Historical rice production data for Calabarzon region (1985–2024), compiled fr
 
 ## Tech Stack
 
-- **Backend:** Python, Flask, scikit-learn, pandas, NumPy
-- **Frontend:** Vanilla JS, Leaflet.js, CartoDB basemap tiles
+- **Backend:** Python 3, Flask, scikit-learn, pandas, NumPy, Flask-CORS
+- **Frontend:** Vanilla JavaScript, Leaflet.js, CartoDB basemap tiles
 - **Deployment:** Gunicorn WSGI server
+- **Data:** GeoJSON (gzip-compressed for performance)
+- **Authentication:** Session-based (Flask sessions)
