@@ -29,6 +29,7 @@ body{
 
 /* ── CARD ── */
 .card{
+  position:relative;
   background:var(--ink2);border:1px solid var(--border2);
   border-radius:16px;padding:40px 36px 36px;
   width:100%;max-width:380px;
@@ -118,27 +119,28 @@ body{
     </div>
   </div>
 
-  <div class="heading">Sign in</div>
-  <div class="subheading">Enter your credentials to access the system.</div>
+  <button onclick="toggleLoginLang()" id="login-lang-btn" style="position:absolute;top:20px;right:20px;background:none;border:1px solid var(--border2);border-radius:20px;color:var(--text2);cursor:pointer;font-size:10.5px;padding:4px 11px;font-family:'Instrument Sans',sans-serif;">🇵🇭 Filipino</button>
+  <div class="heading" id="login-heading">Sign in</div>
+  <div class="subheading" id="login-sub">Enter your credentials to access the system.</div>
 
   <div class="error-msg" id="errorMsg"></div>
 
   <div class="field">
-    <label>Username</label>
+    <label id="lbl-user">Username</label>
     <input type="text" id="username" placeholder="Enter username" autocomplete="username"/>
   </div>
   <div class="field">
-    <label>Password</label>
+    <label id="lbl-pass">Password</label>
     <input type="password" id="password" placeholder="Enter password" autocomplete="current-password"/>
   </div>
 
   <button class="login-btn" id="loginBtn" onclick="doLogin()">
     <div class="spinner"></div>
-    <span class="btn-txt">Sign In →</span>
+    <span class="btn-txt" id="login-btn-txt">Sign In →</span>
   </button>
 
   <div class="demo">
-    <div class="demo-title">Demo Credentials</div>
+    <div class="demo-title" id="demo-title">Demo Credentials</div>
     <div class="demo-row"><span>👤 User (read-only)</span><span>user / user123</span></div>
     <div class="demo-row"><span>🔑 Admin (full access)</span><span>admin / admin123</span></div>
   </div>
@@ -183,6 +185,54 @@ async function doLogin(){
     btn.classList.remove('loading'); btn.disabled = false;
   }
 }
+</script>
+
+<script>
+let loginLang = localStorage.getItem('lang') || 'en';
+const LOGIN_TL = {
+  heading: 'Mag-sign in',
+  sub: 'Ilagay ang iyong mga kredensyal para ma-access ang sistema.',
+  user: 'Username',
+  pass: 'Password',
+  placeholder_user: 'Ilagay ang username',
+  placeholder_pass: 'Ilagay ang password',
+  btn: 'Mag-sign In →',
+  demo: 'Mga Demo na Kredensyal',
+  errBoth: 'Mangyaring ilagay ang username at password.',
+  errFail: 'Maling username o password.',
+  errConn: 'Hindi makakonekta sa server. Siguraduhing tumatakbo ang Flask.',
+  langBtn: '🇵🇭 English',
+};
+const LOGIN_EN = {
+  heading: 'Sign in',
+  sub: 'Enter your credentials to access the system.',
+  user: 'Username',
+  pass: 'Password',
+  placeholder_user: 'Enter username',
+  placeholder_pass: 'Enter password',
+  btn: 'Sign In →',
+  demo: 'Demo Credentials',
+  errBoth: 'Please enter both username and password.',
+  errFail: 'Invalid username or password.',
+  errConn: 'Could not connect to server. Make sure Flask is running.',
+  langBtn: '🇵🇭 Filipino',
+};
+function applyLoginLang(lang){
+  loginLang = lang;
+  localStorage.setItem('lang', lang);
+  const T = lang === 'tl' ? LOGIN_TL : LOGIN_EN;
+  document.getElementById('login-heading').textContent = T.heading;
+  document.getElementById('login-sub').textContent     = T.sub;
+  document.getElementById('lbl-user').textContent      = T.user;
+  document.getElementById('lbl-pass').textContent      = T.pass;
+  document.getElementById('username').placeholder      = T.placeholder_user;
+  document.getElementById('password').placeholder      = T.placeholder_pass;
+  document.getElementById('login-btn-txt').textContent = T.btn;
+  document.getElementById('demo-title').textContent    = T.demo;
+  document.getElementById('login-lang-btn').textContent = T.langBtn;
+}
+function toggleLoginLang(){ applyLoginLang(loginLang === 'en' ? 'tl' : 'en'); }
+applyLoginLang(loginLang);
 </script>
 </body>
 </html>
