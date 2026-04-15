@@ -47,7 +47,15 @@ html,body{height:100%;overflow:hidden;background:var(--ink);color:var(--text);
   .brand-sub{display:none;}
   .brand-name{font-size:9.5px;}
   .top-pills{display:none;}
-  #theme-toggle{padding:4px 9px;font-size:10px;}
+  
+#lang-toggle{
+  background:none;border:1px solid var(--border2);border-radius:20px;
+  color:var(--text2);cursor:pointer;font-size:10.5px;
+  padding:4px 11px;transition:all .2s;white-space:nowrap;flex-shrink:0;
+  font-family:'Instrument Sans',sans-serif;font-weight:500;
+}
+#lang-toggle:hover{background:var(--ink3);color:var(--text);}
+#theme-toggle{padding:4px 9px;font-size:10px;}
   #theme-toggle .tog-icon{font-size:12px;}
 
   /* Map — fixed height on mobile */
@@ -424,6 +432,14 @@ html.light .ghost-btn:hover{background:var(--ink3);color:var(--text);}
 html.light .ig input:focus{border-color:rgba(154,110,32,.6);}
 
 /* ── THEME TOGGLE BUTTON ─────────────────────────────────────────────────────── */
+
+#lang-toggle{
+  background:none;border:1px solid var(--border2);border-radius:20px;
+  color:var(--text2);cursor:pointer;font-size:10.5px;
+  padding:4px 11px;transition:all .2s;white-space:nowrap;flex-shrink:0;
+  font-family:'Instrument Sans',sans-serif;font-weight:500;
+}
+#lang-toggle:hover{background:var(--ink3);color:var(--text);}
 #theme-toggle{
   background:none;border:1px solid var(--border2);border-radius:20px;
   color:var(--text2);cursor:pointer;font-size:13px;
@@ -600,6 +616,17 @@ html.light .mobile-legend{background:var(--ink2);border-color:var(--border);}
   #admin-panel{padding:22px 18px 20px;}
   .ap-grid{grid-template-columns:1fr;}
 }
+
+/* ── Province fill state ──────────────────────────────────────────────────── */
+.ic-empty-note{
+  font-size:9px;color:var(--muted);margin-top:8px;
+  padding:5px 8px;border-radius:5px;
+  border:1px dashed var(--border2);
+  text-align:center;letter-spacing:.03em;
+}
+/* Tab gets a subtle indicator when province has data */
+.ptab.has-data .ptab-dot{background:var(--rice);box-shadow:0 0 4px var(--rice);}
+.ptab.no-data  .ptab-dot{background:var(--muted);}
 @keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 .fade-up{animation:fadeUp .3s ease forwards;}
 </style>
@@ -612,7 +639,7 @@ html.light .mobile-legend{background:var(--ink2);border-color:var(--border);}
       <div class="brand-icon">🌾</div>
       <div>
         <div class="brand-name">AGRI-GIS CALABARZON</div>
-        <div class="brand-sub">Rice Yield Prediction System · Region IV-A · Philippines</div>
+        <div class="brand-sub" data-en="Rice Yield Prediction System · Region IV-A · Philippines" data-tl="Sistema ng Pagtaya ng Ani ng Palay · Rehiyon IV-A · Pilipinas">Rice Yield Prediction System · Region IV-A · Philippines</div>
       </div>
     </div>
     <div class="topbar-right">
@@ -624,12 +651,13 @@ html.light .mobile-legend{background:var(--ink2);border-color:var(--border);}
         <span class="user-name" id="topbar-username"></span>
         <span class="user-role" id="topbar-role"></span>
       </div>
-      <button class="logout-btn" onclick="doLogout()">Sign out</button>
+      <button class="logout-btn" onclick="doLogout()" data-en="Sign out" data-tl="Mag-sign out">Sign out</button>
     </div>
+    <button id="lang-toggle" onclick="toggleLang()" title="Switch to Tagalog / Filipino"><span id="lang-label">🇵🇭 Filipino</span></button>
     <button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode"><span class="tog-icon">🌙</span><span id="tog-label">Dark</span></button>
     <div class="top-pills">
       <span class="pill gold" id="pill-r2">Loading model…</span>
-      <span class="pill teal">Random Forest · 200 trees</span>
+      <span class="pill teal" data-en="Random Forest · 200 trees" data-tl="Random Forest · 200 puno">Random Forest · 200 trees</span>
       <span class="pill" id="pill-n">—</span>
     </div>
     </div>
@@ -639,47 +667,47 @@ html.light .mobile-legend{background:var(--ink2);border-color:var(--border);}
     <div id="sidebar">
       <div class="sb-scroll">
 
-        <div class="sec-hd">Model Performance</div>
+        <div class="sec-hd" data-en="Model Performance" data-tl="Pagganap ng Modelo">Model Performance</div>
         <div class="stats-strip">
-          <div class="sc"><div class="sv" id="s-r2">—</div><div class="sl">R² Score</div></div>
-          <div class="sc"><div class="sv" id="s-mse">—</div><div class="sl">MSE</div></div>
-          <div class="sc"><div class="sv" id="s-rmse">—</div><div class="sl">RMSE</div></div>
+          <div class="sc"><div class="sv" id="s-r2">—</div><div class="sl" data-en="R² Score" data-tl="Marka R²">R² Score</div></div>
+          <div class="sc"><div class="sv" id="s-mse">—</div><div class="sl" data-en="MSE" data-tl="MSE">MSE</div></div>
+          <div class="sc"><div class="sv" id="s-rmse">—</div><div class="sl" data-en="RMSE" data-tl="RMSE">RMSE</div></div>
         </div>
 
-        <div class="sec-hd">Global Defaults</div>
+        <div class="sec-hd" data-en="Global Defaults" data-tl="Mga Pandaigdigang Default">Global Defaults</div>
         <div class="global-bar">
           <div class="g-grid">
-            <div class="ig"><label>Temperature (°C)</label>
+            <div class="ig"><label data-en="Temperature (°C)" data-tl="Temperatura (°C)">Temperature (°C)</label>
               <input type="number" id="g-temp" value="27.5" step="0.1"><div class="hint">Optimal 25–28 °C</div></div>
-            <div class="ig"><label>Rainfall (mm)</label>
+            <div class="ig"><label data-en="Rainfall (mm)" data-tl="Pag-ulan (mm)">Rainfall (mm)</label>
               <input type="number" id="g-rain" value="2100" step="10"><div class="hint">Range 1600–2700</div></div>
-            <div class="ig"><label>Soil Moisture (%)</label>
+            <div class="ig"><label data-en="Soil Moisture (%)" data-tl="Kahalumigmigan ng Lupa (%)">Soil Moisture (%)</label>
               <input type="number" id="g-moist" value="65" step="1"><div class="hint">Optimal 60–75 %</div></div>
-            <div class="ig"><label>Fertilizer (kg/ha)</label>
+            <div class="ig"><label data-en="Fertilizer (kg/ha)" data-tl="Pataba (kg/ha)">Fertilizer (kg/ha)</label>
               <input type="number" id="g-fert" value="150" step="1"><div class="hint">Range 60–200 kg/ha</div></div>
-            <div class="ig"><label>Disease Severity (0-5)</label>
+            <div class="ig"><label data-en="Disease Severity (0-5)" data-tl="Kalubhaan ng Sakit (0-5)">Disease Severity (0-5)</label>
               <input type="number" id="g-disease" value="2" step="1" min="0" max="5"><div class="hint">0=None, 5=Severe</div></div>
           </div>
-          <button class="ghost-btn" onclick="applyGlobal()">↓ Apply to all provinces</button>
+          <button class="ghost-btn" onclick="applyGlobal()" data-en="↓ Apply to all provinces" data-tl="↓ Ilapat sa lahat ng lalawigan">↓ Apply to all provinces</button>
         </div>
 
-        <div class="sec-hd">Per-Province Inputs</div>
+        <div class="sec-hd" data-en="Per-Province Inputs" data-tl="Input Bawat Lalawigan">Per-Province Inputs</div>
         <div class="prov-tabs" id="provTabs"></div>
         <div id="provCards"></div>
 
         <button class="run-btn" id="runBtn" onclick="runPrediction()">
           <div class="spinner"></div>
-          <span class="btn-txt">▶ &nbsp;Analyse & Update Map</span>
+          <span class="btn-txt" id="runBtnTxt">▶ &nbsp;Analyse & Update Map</span>
         </button>
 
         <div id="resultsWrap" style="display:none;">
-          <div class="sec-hd">Yield Predictions</div>
+          <div class="sec-hd" data-en="Yield Predictions" data-tl="Mga Hula sa Ani">Yield Predictions</div>
           <div id="resultRows"></div>
-          <div class="sec-hd" style="margin-top:.9rem;">Yield Thresholds</div>
+          <div class="sec-hd" style="margin-top:.9rem;" data-en="Yield Thresholds" data-tl="Mga Limitasyon ng Ani">Yield Thresholds</div>
           <div class="thresh-strip">
-            <div class="ts"><div class="tv" style="color:var(--green)" id="th-hi">—</div><div class="tl">High ≥ t/ha</div></div>
-            <div class="ts"><div class="tv" style="color:var(--yellow)" id="th-lo">—</div><div class="tl">Moderate t/ha</div></div>
-            <div class="ts"><div class="tv" style="color:var(--red)">Below</div><div class="tl">Low yield</div></div>
+            <div class="ts"><div class="tv" style="color:var(--green)" id="th-hi">—</div><div class="tl" data-en="High ≥ t/ha" data-tl="Mataas ≥ t/ha">High ≥ t/ha</div></div>
+            <div class="ts"><div class="tv" style="color:var(--yellow)" id="th-lo">—</div><div class="tl" data-en="Moderate t/ha" data-tl="Katamtaman t/ha">Moderate t/ha</div></div>
+            <div class="ts"><div class="tv" style="color:var(--red)">Below</div><div class="tl" data-en="Low yield" data-tl="Mababang ani">Low yield</div></div>
           </div>
         </div>
 
@@ -688,7 +716,7 @@ html.light .mobile-legend{background:var(--ink2);border-color:var(--border);}
       <div id="tips-drawer">
         <div class="tips-scroll">
           <div class="tips-hd">
-            <div class="tips-ttl" id="tips-title">Yield Improvement Tips</div>
+            <div class="tips-ttl" id="tips-title" data-en="Yield Improvement Tips" data-tl="Mga Tip para Mapabuti ang Ani">Yield Improvement Tips</div>
             <button class="tips-close" onclick="closeTips()">✕</button>
           </div>
           <div id="tipsList"></div>
@@ -703,13 +731,13 @@ html.light .mobile-legend{background:var(--ink2);border-color:var(--border);}
         <div class="loader-txt">Loading GADM boundaries…</div>
       </div>
       <div class="map-legend">
-        <div class="leg-ttl">Yield Classification</div>
-        <div class="leg-row"><div class="leg-sw" style="background:var(--green)"></div><span class="leg-txt">High yield</span><span class="leg-val" id="leg-hi">≥ — t/ha</span></div>
-        <div class="leg-row"><div class="leg-sw" style="background:var(--yellow)"></div><span class="leg-txt">Moderate</span><span class="leg-val" id="leg-mo">—–— t/ha</span></div>
-        <div class="leg-row"><div class="leg-sw" style="background:var(--red)"></div><span class="leg-txt">Low yield</span><span class="leg-val" id="leg-lo">&lt; — t/ha</span></div>
+        <div class="leg-ttl" data-en="Yield Classification" data-tl="Klasipikasyon ng Ani">Yield Classification</div>
+        <div class="leg-row"><div class="leg-sw" style="background:var(--green)"></div><span class="leg-txt" data-en="High yield" data-tl="Mataas na ani">High yield</span><span class="leg-val" id="leg-hi">≥ — t/ha</span></div>
+        <div class="leg-row"><div class="leg-sw" style="background:var(--yellow)"></div><span class="leg-txt" data-en="Moderate" data-tl="Katamtaman">Moderate</span><span class="leg-val" id="leg-mo">—–— t/ha</span></div>
+        <div class="leg-row"><div class="leg-sw" style="background:var(--red)"></div><span class="leg-txt" data-en="Low yield" data-tl="Mababang ani">Low yield</span><span class="leg-val" id="leg-lo">&lt; — t/ha</span></div>
         <div class="leg-row" style="margin-top:7px;border-top:1px solid var(--border);padding-top:7px;">
           <div class="leg-sw" style="background:var(--muted)"></div>
-          <span class="leg-txt" style="color:var(--muted)">Not analysed</span>
+          <span class="leg-txt" style="color:var(--muted)" data-en="Not analysed" data-tl="Hindi pa nasuri">Not analysed</span>
         </div>
       </div>
       <div class="hover-card" id="hoverCard"></div>
@@ -720,22 +748,22 @@ html.light .mobile-legend{background:var(--ink2);border-color:var(--border);}
     <div class="mobile-legend" id="mobileLegend">
       <div class="mob-leg-item">
         <div class="mob-leg-sw" style="background:var(--green)"></div>
-        <span class="mob-leg-txt">High</span>
+        <span class="mob-leg-txt" data-en="High" data-tl="Mataas">High</span>
         <span class="mob-leg-val" id="mob-leg-hi">≥ — t/ha</span>
       </div>
       <div class="mob-leg-item">
         <div class="mob-leg-sw" style="background:var(--yellow)"></div>
-        <span class="mob-leg-txt">Moderate</span>
+        <span class="mob-leg-txt" data-en="Moderate" data-tl="Katamtaman">Moderate</span>
         <span class="mob-leg-val" id="mob-leg-mo">—–— t/ha</span>
       </div>
       <div class="mob-leg-item">
         <div class="mob-leg-sw" style="background:var(--red)"></div>
-        <span class="mob-leg-txt">Low</span>
+        <span class="mob-leg-txt" data-en="Low" data-tl="Mababa">Low</span>
         <span class="mob-leg-val" id="mob-leg-lo">&lt; — t/ha</span>
       </div>
       <div class="mob-leg-item">
         <div class="mob-leg-sw" style="background:var(--muted)"></div>
-        <span class="mob-leg-txt" style="color:var(--muted)">Not analysed</span>
+        <span class="mob-leg-txt" style="color:var(--muted)" data-en="Not analysed" data-tl="Hindi pa nasuri">Not analysed</span>
       </div>
     </div>
   </div>
@@ -745,39 +773,39 @@ html.light .mobile-legend{background:var(--ink2);border-color:var(--border);}
 <div id="admin-overlay">
   <div id="admin-panel">
     <div class="ap-hd">
-      <div class="ap-title">⚙ Admin Settings</div>
+      <div class="ap-title" data-en="⚙ Admin Settings" data-tl="⚙ Mga Setting ng Admin">⚙ Admin Settings</div>
       <button class="ap-close" onclick="closeAdmin()">✕</button>
     </div>
-    <div class="ap-sec">Rice Area per Province (ha)</div>
+    <div class="ap-sec" data-en="Rice Area per Province (ha)" data-tl="Lugar ng Palay bawat Lalawigan (ha)">Rice Area per Province (ha)</div>
     <div class="ap-grid">
       <div class="ap-field">
-        <label>Cavite</label>
+        <label data-en="Cavite" data-tl="Cavite">Cavite</label>
         <input type="number" id="ap-cavite" min="0" step="100">
-        <div class="ap-hint">Harvested rice area in hectares</div>
+        <div class="ap-hint" data-en="Harvested rice area in hectares" data-tl="Lugar ng naaning palay sa ektarya">Harvested rice area in hectares</div>
       </div>
       <div class="ap-field">
-        <label>Laguna</label>
+        <label data-en="Laguna" data-tl="Laguna">Laguna</label>
         <input type="number" id="ap-laguna" min="0" step="100">
-        <div class="ap-hint">Harvested rice area in hectares</div>
+        <div class="ap-hint" data-en="Harvested rice area in hectares" data-tl="Lugar ng naaning palay sa ektarya">Harvested rice area in hectares</div>
       </div>
       <div class="ap-field">
-        <label>Batangas</label>
+        <label data-en="Batangas" data-tl="Batangas">Batangas</label>
         <input type="number" id="ap-batangas" min="0" step="100">
-        <div class="ap-hint">Harvested rice area in hectares</div>
+        <div class="ap-hint" data-en="Harvested rice area in hectares" data-tl="Lugar ng naaning palay sa ektarya">Harvested rice area in hectares</div>
       </div>
       <div class="ap-field">
-        <label>Rizal</label>
+        <label data-en="Rizal" data-tl="Rizal">Rizal</label>
         <input type="number" id="ap-rizal" min="0" step="100">
-        <div class="ap-hint">Harvested rice area in hectares</div>
+        <div class="ap-hint" data-en="Harvested rice area in hectares" data-tl="Lugar ng naaning palay sa ektarya">Harvested rice area in hectares</div>
       </div>
       <div class="ap-field">
-        <label>Quezon</label>
+        <label data-en="Quezon" data-tl="Quezon">Quezon</label>
         <input type="number" id="ap-quezon" min="0" step="100">
-        <div class="ap-hint">Harvested rice area in hectares</div>
+        <div class="ap-hint" data-en="Harvested rice area in hectares" data-tl="Lugar ng naaning palay sa ektarya">Harvested rice area in hectares</div>
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:.85rem;">
-      <button class="ap-save" onclick="saveAdminSettings()" style="flex:1;">💾 Save Changes</button>
+      <button class="ap-save" onclick="saveAdminSettings()" style="flex:1;" data-en="💾 Save Changes" data-tl="💾 I-save ang mga Pagbabago">💾 Save Changes</button>
       <button class="ap-reset" onclick="resetAdminSettings()" style="flex:1;background:rgba(239,68,68,.2);color:#ef4444;border:1px solid rgba(239,68,68,.4);font-family:'Unbounded',sans-serif;font-size:9px;font-weight:700;letter-spacing:.06em;padding:11px;border-radius:var(--r);cursor:pointer;transition:opacity .2s;">🔄 Reset to Default</button>
     </div>
     <div class="ap-msg" id="ap-msg"></div>
@@ -851,18 +879,62 @@ PROVINCES.forEach((p,i) => {
     </div>
     <div class="ic-grid">
       <div class="ig"><label>Avg Temp (°C)</label>
-        <input type="number" id="${p.id}-temp" value="27.5" step="0.1"><div class="hint">25–30 °C</div></div>
+        <input type="number" id="${p.id}-temp" placeholder="e.g. 27.5" step="0.1"><div class="hint">25–30 °C</div></div>
       <div class="ig"><label>Rainfall (mm)</label>
-        <input type="number" id="${p.id}-rain" value="2100" step="10"><div class="hint">1600–2700 mm</div></div>
-      <div class="ig"><label>Soil Moisture (%)</label>
-        <input type="number" id="${p.id}-moist" value="65" step="1"><div class="hint">50–80 %</div></div>
-      <div class="ig"><label>Fertilizer (kg/ha)</label>
-        <input type="number" id="${p.id}-fert" value="150" step="1"><div class="hint">60–200 kg/ha</div></div>
-      <div class="ig"><label>Disease Severity (0-5)</label>
-        <input type="number" id="${p.id}-disease" value="2" step="1" min="0" max="5"><div class="hint">0=None, 5=Severe</div></div>
+        <input type="number" id="${p.id}-rain" placeholder="e.g. 2100" step="10"><div class="hint">1600–2700 mm</div></div>
+      <div class="ig"><label data-en="Soil Moisture (%)" data-tl="Kahalumigmigan ng Lupa (%)">Soil Moisture (%)</label>
+        <input type="number" id="${p.id}-moist" placeholder="e.g. 65" step="1"><div class="hint">50–80 %</div></div>
+      <div class="ig"><label data-en="Fertilizer (kg/ha)" data-tl="Pataba (kg/ha)">Fertilizer (kg/ha)</label>
+        <input type="number" id="${p.id}-fert" placeholder="e.g. 150" step="1"><div class="hint">60–200 kg/ha</div></div>
+      <div class="ig"><label data-en="Disease Severity (0-5)" data-tl="Kalubhaan ng Sakit (0-5)">Disease Severity (0-5)</label>
+        <input type="number" id="${p.id}-disease" placeholder="0–5" step="1" min="0" max="5"><div class="hint">0=None, 5=Severe</div></div>
     </div>`;
   cardsEl.appendChild(card);
 });
+
+
+function isProvinceFilled(provId){
+  const fields = ['temp','rain','moist','fert','disease'];
+  return fields.every(f => {
+    const el = document.getElementById(`${provId}-${f}`);
+    return el && el.value.trim() !== '' && !isNaN(parseFloat(el.value));
+  });
+}
+
+function updateTabFillState(){
+  PROVINCES.forEach(p => {
+    const tab = document.getElementById(`tab-${p.id}`);
+    if(!tab) return;
+    const filled = isProvinceFilled(p.id);
+    tab.classList.toggle('has-data', filled);
+    tab.classList.toggle('no-data', !filled);
+    // Hide/show empty note
+    const note = document.getElementById(`note-${p.id}`);
+    if(note) note.style.display = filled ? 'none' : 'block';
+  });
+}
+
+// Watch inputs for changes to update tab state live
+
+function updateRunBtnLabel(){
+  const filled = PROVINCES.filter(p => isProvinceFilled(p.id)).length;
+  const lbl = document.getElementById('runBtnTxt');
+  if(!lbl) return;
+  if(filled === 0)      lbl.textContent = '▶  Fill inputs to analyse';
+  else if(filled === 5) lbl.textContent = '▶  Analyse All 5 Provinces';
+  else                  lbl.textContent = `▶  Analyse ${filled} Province${filled>1?'s':''}`;
+}
+
+function attachFillWatchers(){
+  PROVINCES.forEach(p => {
+    ['temp','rain','moist','fert','disease'].forEach(f => {
+      const el = document.getElementById(`${p.id}-${f}`);
+      if(el) el.addEventListener('input', () => { updateTabFillState(); updateRunBtnLabel(); });
+    });
+  });
+  updateTabFillState();
+  updateRunBtnLabel();
+}
 
 function setTab(id){
   PROVINCES.forEach(p=>{
@@ -1133,7 +1205,14 @@ async function runPrediction(){
   }
   const btn=document.getElementById('runBtn');
   btn.classList.add('loading');btn.disabled=true;
-  const payload={provinces:PROVINCES.map(p=>({
+  // Only include provinces that have all fields filled
+  const filledProvinces = PROVINCES.filter(p => isProvinceFilled(p.id));
+  if(filledProvinces.length === 0){
+    alert('Please fill in at least one province\'s inputs before running analysis.');
+    btn.classList.remove('loading'); btn.disabled = false;
+    return;
+  }
+  const payload={provinces:filledProvinces.map(p=>({
     id:p.id,name:p.name,
     avg_temp:         parseFloat(document.getElementById(`${p.id}-temp`).value),
     rainfall_mm:      parseFloat(document.getElementById(`${p.id}-rain`).value),
@@ -1584,6 +1663,216 @@ function showApMsg(msg, ok){
 document.getElementById('admin-overlay').addEventListener('click', function(e){
   if(e.target === this) closeAdmin();
 });
+
+
+// ── Language Toggle ───────────────────────────────────────────────────────────
+const TRANSLATIONS = {
+  // Dynamic JS strings — keyed by English text
+  en: {
+    loadingModel:        'Loading model\u2026',
+    nSamples:            n => `n = ${n} samples`,
+    loadingBoundaries:   'Loading CALABARZON boundaries (44KB compressed)...',
+    decompressing:       'Decompressing geographic data...',
+    rendering:           'Rendering map layers...',
+    loadedOk:            'Map data loaded successfully!',
+    loadFailed:          '\u274C Map data failed to load',
+    runAnalysis:         '\u25b6\u00a0\u00a0Analyse & Update Map',
+    analyseAll:          '\u25b6\u00a0\u00a0Analyse All 5 Provinces',
+    analyseN:            n => `\u25b6\u00a0\u00a0Analyse ${n} Province${n>1?'s':''}`,
+    fillFirst:           '\u25b6  Fill inputs to analyse',
+    noFilledAlert:       "Please fill in at least one province's inputs before running analysis.",
+    runAnalysisToSee:    'Run analysis to see yield prediction',
+    viewTips:            '\ud83d\udccb View improvement tips \u2192',
+    yieldLabel:          cat => `${cat.toUpperCase()} YIELD`,
+    highYield:           'HIGH YIELD',
+    modYield:            'MODERATE YIELD',
+    lowYield:            'LOW YIELD',
+    capital:             'Capital',
+    riceArea:            'Rice Area (ha)',
+    totalArea:           'Total Area',
+    temperature:         'Temperature',
+    rainfall:            'Rainfall',
+    tipsTitle:           prov => `Tips \u2014 ${prov}`,
+    emptyNote:           '\u26aa Leave blank to exclude this province from analysis',
+    adminSaved:          '\u2713 Rice areas updated successfully. Re-run analysis to apply changes.',
+    noData:              '\u2014',
+    highLeg:             h => `\u2265 ${h} t/ha`,
+    modLeg:              (l,h) => `${l}\u2013${h} t/ha`,
+    lowLeg:              l => `< ${l} t/ha`,
+    // Tutorial steps
+    tutSteps: [
+      { title: 'Welcome to AGRI-GIS CALABARZON', body: 'This system predicts rice yield for the 5 provinces of Region IV\u2011A using a Random Forest model. Let\u2019s walk through how to get your first prediction.' },
+      { title: 'Step 1 \u2014 Set Global Defaults', body: 'Use these fields to set the same environmental values for all provinces at once. Enter the average temperature, rainfall, soil moisture, fertilizer rate, and disease severity for the season.' },
+      { title: 'Step 2 \u2014 Apply to All Provinces', body: 'Click \u201c\u2193 Apply to all provinces\u201d to copy your global values into each province\u2019s input card. You can still adjust individual provinces after.' },
+      { title: 'Step 3 \u2014 Adjust Per-Province Inputs', body: 'Click a province tab (Cavite, Laguna, etc.) to switch between them. Each province can have different values if conditions vary across the region.' },
+      { title: 'Step 4 \u2014 Fine-tune Each Province', body: 'The active input card shows fields for temperature, rainfall, soil moisture, fertilizer, and disease severity. Leave a province blank to exclude it from the analysis.' },
+      { title: 'Step 5 \u2014 Run the Analysis', body: 'Click \u201c\u25b6 Analyse\u201d to run the Random Forest model. Only provinces with filled inputs will be predicted.' },
+      { title: 'Step 6 \u2014 Read the Map', body: 'The map updates with colour-coded provinces. Green = high yield, Yellow = moderate, Red = low. Tap a province to open the detailed popup.' },
+      { title: 'Step 7 \u2014 View Yield Results', body: 'The results panel shows predicted yield (t/ha) and estimated total production for each analysed province. Click any row to open improvement tips.' },
+      { title: 'Step 8 \u2014 Read the Improvement Tips', body: 'Click any province row or the \u201cView improvement tips\u201d button. A tips drawer slides up with recommendations on fertilizer, irrigation, and disease management.' },
+      { title: 'Step 9 \u2014 Switch Theme', body: 'Use the \ud83c\udf19 Dark / \u2609\ufe0f Light button to switch between dark and light mode. Your preference is saved automatically.' },
+      { title: "You're ready!", body: 'That\u2019s everything you need to use AGRI-GIS CALABARZON. Click the \u201c?\u201d button in the bottom-right corner anytime to restart this tutorial.', isLast: true },
+    ]
+  },
+  tl: {
+    loadingModel:        'Naglo-load ang modelo\u2026',
+    nSamples:            n => `n = ${n} mga sample`,
+    loadingBoundaries:   'Naglo-load ng mga hangganan ng CALABARZON...',
+    decompressing:       'Ino-decompress ang geographic data...',
+    rendering:           'Ginagawa ang mga layer ng mapa...',
+    loadedOk:            'Matagumpay na na-load ang datos ng mapa!',
+    loadFailed:          '\u274C Nabigong i-load ang datos ng mapa',
+    runAnalysis:         '\u25b6\u00a0\u00a0Suriin at I-update ang Mapa',
+    analyseAll:          '\u25b6\u00a0\u00a0Suriin ang Lahat ng 5 Lalawigan',
+    analyseN:            n => `\u25b6\u00a0\u00a0Suriin ang ${n} Lalawigan${n>1?'':''}`,
+    fillFirst:           '\u25b6  Punan ang mga input para suriin',
+    noFilledAlert:       'Mangyaring punan ang input ng kahit isang lalawigan bago magsimula ng pagsusuri.',
+    runAnalysisToSee:    'Magsimula ng pagsusuri para makita ang resulta',
+    viewTips:            '\ud83d\udccb Tingnan ang mga tip sa pagpapabuti \u2192',
+    yieldLabel:          cat => `${cat === 'high' ? 'MATAAS' : cat === 'moderate' ? 'KATAMTAMAN' : 'MABABA'} NA ANI`,
+    capital:             'Kabisera',
+    riceArea:            'Lugar ng Palay (ha)',
+    totalArea:           'Kabuuang Lugar',
+    temperature:         'Temperatura',
+    rainfall:            'Pag-ulan',
+    tipsTitle:           prov => `Mga Tip \u2014 ${prov}`,
+    emptyNote:           '\u26aa Iwanan ang blangko para hindi isama ang lawigang ito sa pagsusuri',
+    adminSaved:          '\u2713 Matagumpay na na-update ang mga lugar ng palay. I-ulit ang pagsusuri para mailapat.',
+    noData:              '\u2014',
+    highLeg:             h => `\u2265 ${h} t/ha`,
+    modLeg:              (l,h) => `${l}\u2013${h} t/ha`,
+    lowLeg:              l => `< ${l} t/ha`,
+    tutSteps: [
+      { title: 'Maligayang Pagdating sa AGRI-GIS CALABARZON', body: 'Ang sistemang ito ay nagtataya ng ani ng palay para sa 5 lalawigan ng Rehiyon IV-A gamit ang Random Forest na modelo. Alamin natin kung paano makakuha ng iyong unang hula.' },
+      { title: 'Hakbang 1 \u2014 Itakda ang Mga Pandaigdigang Default', body: 'Gamitin ang mga field na ito para magtakda ng parehong mga halaga para sa lahat ng lalawigan nang sabay. Ilagay ang average na temperatura, pag-ulan, kahalumigmigan ng lupa, pataba, at kalubhaan ng sakit.' },
+      { title: 'Hakbang 2 \u2014 Ilapat sa Lahat ng Lalawigan', body: 'I-click ang "\u2193 Ilapat sa lahat ng lalawigan" para kopyahin ang mga pandaigdigang halaga sa bawat input card ng lalawigan. Maaari ka pa ring mag-adjust ng mga indibidwal na lalawigan pagkatapos.' },
+      { title: 'Hakbang 3 \u2014 I-adjust ang Mga Input Bawat Lalawigan', body: 'I-click ang tab ng lalawigan (Cavite, Laguna, atbp.) para lumipat sa pagitan nila. Ang bawat lalawigan ay maaaring magkaroon ng iba\'t ibang halaga.' },
+      { title: 'Hakbang 4 \u2014 I-fine-tune ang Bawat Lalawigan', body: 'Ipinapakita ng aktibong input card ang mga field para sa temperatura, pag-ulan, kahalumigmigan ng lupa, pataba, at kalubhaan ng sakit. Iwanan ang blangko para hindi isama ang lalawigan.' },
+      { title: 'Hakbang 5 \u2014 Simulan ang Pagsusuri', body: 'I-click ang "\u25b6 Suriin" para patakbuhin ang Random Forest na modelo. Ang mga lawigang may mga napunang input lamang ang mahuhulaan.' },
+      { title: 'Hakbang 6 \u2014 Basahin ang Mapa', body: 'Ina-update ang mapa gamit ang mga may kulay na lalawigan. Berde = mataas na ani, Dilaw = katamtaman, Pula = mababa. I-tap ang isang lalawigan para makita ang detalyadong popup.' },
+      { title: 'Hakbang 7 \u2014 Tingnan ang Mga Resulta ng Ani', body: 'Ipinapakita ng results panel ang hinulaang ani (t/ha) at tinatantiyang kabuuang produksyon para sa bawat nasuring lalawigan.' },
+      { title: 'Hakbang 8 \u2014 Basahin ang Mga Tip sa Pagpapabuti', body: 'I-click ang anumang hilera ng lalawigan o ang "Tingnan ang mga tip" na button. Lilitaw ang tips drawer na may mga rekomendasyon para sa pataba, patubig, at pamamahala ng sakit.' },
+      { title: 'Hakbang 9 \u2014 Palitan ang Tema', body: 'Gamitin ang \ud83c\udf19 Madilim / \u2609\ufe0f Maliwanag na button para lumipat sa pagitan ng madilim at maliwanag na mode. Awtomatikong nase-save ang iyong kagustuhan.' },
+      { title: 'Handa ka na!', body: 'Iyon na ang lahat ng kailangan mo para gamitin ang AGRI-GIS CALABARZON. I-click ang "?" na button sa kanang-ibabang sulok anumang oras para i-restart ang tutorial na ito.', isLast: true },
+    ]
+  }
+};
+
+let currentLang = localStorage.getItem('lang') || 'en';
+
+function applyLang(lang){
+  currentLang = lang;
+  localStorage.setItem('lang', lang);
+  const isTL = lang === 'tl';
+
+  // Update toggle label
+  document.getElementById('lang-label').textContent = isTL ? '🇵🇭 English' : '🇵🇭 Filipino';
+
+  // Apply all data-en / data-tl static elements
+  document.querySelectorAll('[data-en]').forEach(el => {
+    el.textContent = isTL ? el.dataset.tl : el.dataset.en;
+  });
+
+  // Also handle buttons/elements where textContent was set via data-*
+  // (buttons that have both data-en and inner HTML needing update)
+
+  // Dynamic elements — update live
+  const T = TRANSLATIONS[lang];
+
+  // Pill
+  const pillN = document.getElementById('pill-n');
+  if(pillN && pillN.textContent !== '\u2014'){
+    const match = pillN.textContent.match(/\d+/);
+    if(match) pillN.textContent = T.nSamples(parseInt(match[0]));
+  }
+
+  // Run button
+  updateRunBtnLabel();
+
+  // Loader text (if visible)
+  const loaderTxt = document.querySelector('.loader-txt');
+  if(loaderTxt) loaderTxt.textContent = T.loadingBoundaries;
+
+  // Empty notes on province cards
+  document.querySelectorAll('.ic-empty-note').forEach(el => {
+    el.textContent = T.emptyNote;
+  });
+
+  // Re-render results if they exist
+  if(Object.keys(state.results).length > 0){
+    const resultsArr = PROVINCES
+      .filter(p => state.results[p.id])
+      .map(p => state.results[p.id]);
+    if(resultsArr.length) renderResults(resultsArr);
+  }
+
+  // Update tips title if open
+  const tipsTitle = document.getElementById('tips-title');
+  if(tipsTitle && tipsTitle.dataset.provId){
+    const prov = PROVINCES.find(p => p.id === tipsTitle.dataset.provId);
+    if(prov) tipsTitle.textContent = T.tipsTitle(prov.name);
+  }
+
+  // Rebuild tutorial steps with new language
+  // (will take effect on next tutRender call)
+}
+
+function toggleLang(){
+  applyLang(currentLang === 'en' ? 'tl' : 'en');
+}
+
+// ── Patch functions that generate dynamic text ─────────────────────────────
+
+// Wrap updateRunBtnLabel to use translations
+const _origUpdateRunBtnLabel = updateRunBtnLabel;
+updateRunBtnLabel = function(){
+  const T   = TRANSLATIONS[currentLang];
+  const filled = PROVINCES.filter(p => isProvinceFilled(p.id)).length;
+  const lbl  = document.getElementById('runBtnTxt');
+  if(!lbl) return;
+  if(filled === 0)      lbl.textContent = T.fillFirst;
+  else if(filled === 5) lbl.textContent = T.analyseAll;
+  else                  lbl.textContent = T.analyseN(filled);
+};
+
+// Override tutRender to use translated steps
+const _origTutRender = tutRender;
+tutRender = function(){
+  const steps = TRANSLATIONS[currentLang].tutSteps;
+  const s     = steps[tutStep];
+  document.getElementById('tut-badge').textContent  = tutStep + 1;
+  document.getElementById('tut-title').textContent  = s.title;
+  document.getElementById('tut-body').textContent   = s.body;
+  document.getElementById('tut-next-btn').textContent = s.isLast ? (currentLang === 'tl' ? 'Magsimula ✓' : 'Get started \u2713') : (currentLang === 'tl' ? 'Susunod \u2192' : 'Next \u2192');
+  tutBuildDots();
+  tutHighlight(TUT_STEPS[tutStep] ? TUT_STEPS[tutStep].target : null);
+  tutPosition(TUT_STEPS[tutStep] ? TUT_STEPS[tutStep].target : null, TUT_STEPS[tutStep] ? TUT_STEPS[tutStep].pos : 'center');
+};
+
+// Override openTips to store provId for language updates
+const _origOpenTips = openTips;
+openTips = function(provId){
+  const T    = TRANSLATIONS[currentLang];
+  const r    = state.results[provId]; if(!r) return;
+  const prov = PROVINCES.find(p => p.id === provId);
+  const tipsTitle = document.getElementById('tips-title');
+  tipsTitle.textContent   = T.tipsTitle(prov.name);
+  tipsTitle.dataset.provId = provId;
+  const list = document.getElementById('tipsList');
+  list.innerHTML = '';
+  r.tips.forEach(t => {
+    const d = document.createElement('div');
+    d.className = `tip ${t.type} fade-up`;
+    d.innerHTML = `<div class="tip-ico">${t.icon}</div>
+      <div><div class="tip-ttl">${t.title}</div><div class="tip-body">${t.body}</div></div>`;
+    list.appendChild(d);
+  });
+  document.getElementById('tips-drawer').classList.add('open');
+  map.closePopup();
+};
+
+// Initialise language on load
+(function(){ applyLang(currentLang); })();
 
 // ── Theme toggle ──────────────────────────────────────────────────────────────
 const TILE_DARK  = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
