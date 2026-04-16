@@ -646,13 +646,14 @@ html.light .mobile-legend{background:var(--ink2);border-color:var(--border);}
     <div id="admin-btn-wrap" style="display:none;">
       <button id="admin-btn" onclick="openAdmin()">⚙ Admin</button>
     </div>
-    <div class="user-badge">
+    <div class="user-badge" id="admin-badge" style="display:none;">
       <div class="user-info">
         <span class="user-name" id="topbar-username"></span>
         <span class="user-role" id="topbar-role"></span>
       </div>
       <button class="logout-btn" onclick="doLogout()" data-en="Sign out" data-tl="Mag-sign out">Sign out</button>
     </div>
+    <button id="admin-login-btn" onclick="window.location.href='/admin-login'" style="display:none;background:none;border:1px solid var(--border2);border-radius:6px;color:var(--text2);cursor:pointer;font-size:11px;padding:6px 13px;font-family:'Instrument Sans',sans-serif;" data-en="🔑 Admin Login" data-tl="🔑 Admin Login">🔑 Admin Login</button>
     <button id="lang-toggle" onclick="toggleLang()" title="Switch to Tagalog / Filipino"><span id="lang-label">🇵🇭 Filipino</span></button>
     <button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode"><span class="tog-icon">🌙</span><span id="tog-label">Dark</span></button>
     <div class="top-pills">
@@ -1554,15 +1555,18 @@ if(document.readyState === 'loading'){
 
 // ── Auth & Admin ──────────────────────────────────────────────────────────────
 (function initAuth(){
-  // Set user info in topbar
-  document.getElementById('topbar-username').textContent = CURRENT_USER;
-  const roleEl = document.getElementById('topbar-role');
-  roleEl.textContent = CURRENT_ROLE === 'admin' ? '🔑 Admin' : '👤 User';
-  if(CURRENT_ROLE === 'admin') roleEl.classList.add('admin');
-
-  // Show admin button only for admins
   if(CURRENT_ROLE === 'admin'){
+    // Show admin badge + logout
+    document.getElementById('topbar-username').textContent = CURRENT_USER;
+    const roleEl = document.getElementById('topbar-role');
+    roleEl.textContent = '🔑 Admin';
+    roleEl.classList.add('admin');
+    document.getElementById('admin-badge').style.display = 'flex';
+    // Show admin settings button
     document.getElementById('admin-btn-wrap').style.display = 'block';
+  } else {
+    // Guest: show Admin Login button instead
+    document.getElementById('admin-login-btn').style.display = 'block';
   }
 
   // Populate admin fields with current server values
@@ -1576,7 +1580,7 @@ if(document.readyState === 'loading'){
 
 async function doLogout(){
   await fetch('/api/logout', {method:'POST'});
-  window.location.href = '/login';
+  window.location.href = '/';
 }
 
 function openAdmin(){

@@ -13,14 +13,11 @@ app.secret_key = 'agrigis-calabarzon-secret-2024'
 CORS(app)
 
 # ── User accounts ─────────────────────────────────────────────────────────────
-# In production, use a real database. For thesis demo, hardcoded is fine.
 USERS = {
     'admin': {'password': 'admin123', 'role': 'admin', 'name': 'Administrator'},
-    'user':  {'password': 'user123',  'role': 'user',  'name': 'DA Technician'},
 }
 
 # ── Mutable constants (admin can change these) ────────────────────────────────
-# Rice area harvested per province (ha) — PSA/NAMRIA source
 DEFAULT_RICE_AREAS = {
     'cavite':   14000,
     'laguna':   30000,
@@ -32,21 +29,13 @@ DEFAULT_RICE_AREAS = {
 RICE_AREAS = DEFAULT_RICE_AREAS.copy()
 
 # ── Auth helpers ──────────────────────────────────────────────────────────────
-def login_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if 'user' not in session:
-            if request.is_json:
-                return jsonify({'error': 'Unauthorized', 'redirect': '/login'}), 401
-            return redirect(url_for('login_page'))
-        return f(*args, **kwargs)
-    return decorated
-
 def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if 'user' not in session:
-            return jsonify({'error': 'Unauthorized'}), 401
+            if request.is_json:
+                return jsonify({'error': 'Unauthorized', 'redirect': '/admin-login'}), 401
+            return redirect(url_for('admin_login_page'))
         if session.get('role') != 'admin':
             return jsonify({'error': 'Admin access required'}), 403
         return f(*args, **kwargs)
@@ -193,11 +182,11 @@ def generate_tips(inputs, y_val, category):
     return tips
 
 
-# ── Auth routes ───────────────────────────────────────────────────────────────
+# ── Admin auth routes ─────────────────────────────────────────────────────────
 
-@app.route('/login')
-def login_page():
-    if 'user' in session:
+@app.route('/admin-login')
+def admin_login_page():
+    if 'user' in session and session.get('role') == 'admin':
         return redirect(url_for('index'))
     return render_template('login.html')
 
@@ -227,7 +216,7 @@ def me():
                     'role': session['role'], 'name': session['name']})
 
 
-# ── Admin routes ──────────────────────────────────────────────────────────────
+# ── Admin routes (protected) ──────────────────────────────────────────────────
 
 @app.route('/api/admin/rice-areas', methods=['GET'])
 @admin_required
@@ -259,19 +248,18 @@ def reset_rice_areas():
     return jsonify({'ok': True, 'message': 'Rice areas reset to default values', 'current': RICE_AREAS})
 
 
-# ── Main routes ───────────────────────────────────────────────────────────────
+# ── Main routes (public — no login required) ──────────────────────────────────
 
 @app.route('/')
-@login_required
 def index():
+    is_admin = session.get('role') == 'admin'
     return render_template('index.html',
         stats=json.dumps(DATA_STATS),
-        role=session.get('role'),
-        username=session.get('name'),
+        role='admin' if is_admin else 'guest',
+        username=session.get('name', ''),
         rice_areas=json.dumps(RICE_AREAS))
 
 @app.route('/api/predict', methods=['POST'])
-@login_required
 def predict():
     body      = request.get_json(force=True)
     provinces = body.get('provinces', [])
@@ -308,7 +296,6 @@ def predict():
     })
 
 @app.route('/api/stats')
-@login_required
 def stats():
     return jsonify(DATA_STATS)
 

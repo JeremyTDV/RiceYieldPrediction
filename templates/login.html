@@ -121,7 +121,7 @@ body{
 
   <button onclick="toggleLoginLang()" id="login-lang-btn" style="position:absolute;top:20px;right:20px;background:none;border:1px solid var(--border2);border-radius:20px;color:var(--text2);cursor:pointer;font-size:10.5px;padding:4px 11px;font-family:'Instrument Sans',sans-serif;">🇵🇭 Filipino</button>
   <div class="heading" id="login-heading">Sign in</div>
-  <div class="subheading" id="login-sub">Enter your credentials to access the system.</div>
+  <div class="subheading" id="login-sub">Enter admin credentials to access admin settings.</div>
 
   <div class="error-msg" id="errorMsg"></div>
 
@@ -141,7 +141,6 @@ body{
 
   <div class="demo">
     <div class="demo-title" id="demo-title">Demo Credentials</div>
-    <div class="demo-row"><span>👤 User (read-only)</span><span>user / user123</span></div>
     <div class="demo-row"><span>🔑 Admin (full access)</span><span>admin / admin123</span></div>
   </div>
 </div>
@@ -191,7 +190,7 @@ async function doLogin(){
 let loginLang = localStorage.getItem('lang') || 'en';
 const LOGIN_TL = {
   heading: 'Mag-sign in',
-  sub: 'Ilagay ang iyong mga kredensyal para ma-access ang sistema.',
+  sub: 'Ilagay ang admin na kredensyal para ma-access ang mga setting.',
   user: 'Username',
   pass: 'Password',
   placeholder_user: 'Ilagay ang username',
@@ -205,7 +204,7 @@ const LOGIN_TL = {
 };
 const LOGIN_EN = {
   heading: 'Sign in',
-  sub: 'Enter your credentials to access the system.',
+  sub: 'Enter admin credentials to access admin settings.',
   user: 'Username',
   pass: 'Password',
   placeholder_user: 'Enter username',
