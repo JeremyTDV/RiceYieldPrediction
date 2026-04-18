@@ -629,6 +629,87 @@ html.light .mobile-legend{background:var(--ink2);border-color:var(--border);}
 .ptab.no-data  .ptab-dot{background:var(--muted);}
 @keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 .fade-up{animation:fadeUp .3s ease forwards;}
+/* ── HISTORY DASHBOARD ───────────────────────────────────────────────────── */
+#history-overlay{
+  position:fixed;inset:0;z-index:9400;
+  background:rgba(0,0,0,.82);backdrop-filter:blur(4px);
+  display:none;align-items:flex-start;justify-content:center;
+  padding:20px;overflow-y:auto;
+}
+#history-overlay.open{display:flex;}
+#history-panel{
+  background:var(--ink2);border:1px solid var(--border2);
+  border-radius:16px;width:100%;max-width:1020px;
+  box-shadow:0 24px 80px rgba(0,0,0,.7);
+  display:flex;flex-direction:column;
+  max-height:calc(100vh - 40px);overflow:hidden;
+  margin:auto;
+}
+.hp-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:22px 26px 18px;border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.hp-title{
+  font-family:'Unbounded',sans-serif;font-size:14px;font-weight:700;color:#fff;
+  margin-bottom:3px;
+}
+.hp-sub{font-size:11px;color:var(--text2);}
+.hp-close{
+  background:none;border:none;color:var(--text2);cursor:pointer;
+  font-size:17px;padding:4px 9px;border-radius:6px;transition:background .15s;flex-shrink:0;
+}
+.hp-close:hover{background:var(--ink3);color:var(--text);}
+.hp-clear-all{
+  background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.35);
+  border-radius:6px;color:#fca5a5;cursor:pointer;
+  font-family:'Unbounded',sans-serif;font-size:8.5px;font-weight:700;
+  letter-spacing:.06em;padding:5px 11px;transition:all .15s;flex-shrink:0;
+}
+.hp-clear-all:hover{background:rgba(239,68,68,.28);}
+.hp-empty{
+  text-align:center;padding:56px 20px;
+  font-size:13px;color:var(--text2);
+}
+#hp-table-wrap{
+  flex:1;overflow:auto;
+}
+#hp-table{
+  width:100%;border-collapse:collapse;font-size:12px;
+}
+#hp-table thead{position:sticky;top:0;z-index:2;}
+#hp-table th{
+  background:var(--ink3);color:var(--muted);
+  font-family:'Unbounded',sans-serif;font-size:8px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.14em;
+  padding:10px 14px;text-align:left;white-space:nowrap;
+  border-bottom:1px solid var(--border2);
+}
+#hp-table td{
+  padding:10px 14px;border-bottom:1px solid var(--border);
+  color:var(--text);vertical-align:middle;white-space:nowrap;
+}
+#hp-table tbody tr:hover td{background:rgba(255,255,255,.03);}
+.hp-cat{
+  display:inline-block;font-size:8.5px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 8px;border-radius:20px;
+}
+.hp-cat.high{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bord);}
+.hp-cat.moderate{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow-bord);}
+.hp-cat.low{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bord);}
+.hp-del{
+  background:none;border:none;color:var(--muted);cursor:pointer;
+  font-size:13px;padding:3px 7px;border-radius:5px;transition:all .15s;
+}
+.hp-del:hover{background:rgba(239,68,68,.15);color:#fca5a5;}
+.hp-date{font-size:10.5px;color:var(--text2);}
+.hp-date-day{font-weight:600;color:var(--text);}
+@media(max-width:860px){
+  #history-panel{max-width:100%;}
+  #hp-table th,#hp-table td{padding:8px 10px;font-size:11px;}
+}
+
 </style>
 </head>
 <body>
@@ -643,7 +724,8 @@ html.light .mobile-legend{background:var(--ink2);border-color:var(--border);}
       </div>
     </div>
     <div class="topbar-right">
-    <div id="admin-btn-wrap" style="display:none;">
+    <div id="admin-btn-wrap" style="display:none;gap:6px;align-items:center;">
+      <button id="history-btn" onclick="openHistory()" style="background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.35);border-radius:6px;color:var(--blue);cursor:pointer;font-family:'Unbounded',sans-serif;font-size:9px;font-weight:700;letter-spacing:.06em;padding:5px 11px;transition:all .15s;flex-shrink:0;" data-en="📋 History" data-tl="📋 Kasaysayan">📋 History</button>
       <button id="admin-btn" onclick="openAdmin()">⚙ Admin</button>
     </div>
     <div class="user-badge" id="admin-badge" style="display:none;">
@@ -690,6 +772,7 @@ html.light .mobile-legend{background:var(--ink2);border-color:var(--border);}
               <input type="number" id="g-disease" value="2" step="1" min="0" max="5"><div class="hint">0=None, 5=Severe</div></div>
           </div>
           <button class="ghost-btn" onclick="applyGlobal()" data-en="↓ Apply to all provinces" data-tl="↓ Ilapat sa lahat ng lalawigan">↓ Apply to all provinces</button>
+          <button class="ghost-btn" id="clear-all-btn" onclick="clearAllInputs()" style="color:var(--text2);" data-en="✕ Clear all inputs" data-tl="✕ Burahin lahat ng input">✕ Clear all inputs</button>
         </div>
 
         <div class="sec-hd" data-en="Per-Province Inputs" data-tl="Input Bawat Lalawigan">Per-Province Inputs</div>
@@ -769,6 +852,47 @@ html.light .mobile-legend{background:var(--ink2);border-color:var(--border);}
     </div>
   </div>
 
+
+<!-- ── HISTORY DASHBOARD ─────────────────────────────────────────────── -->
+<div id="history-overlay">
+  <div id="history-panel">
+    <div class="hp-hd">
+      <div>
+        <div class="hp-title" data-en="📋 Analysis History" data-tl="📋 Kasaysayan ng Pagsusuri">📋 Analysis History</div>
+        <div class="hp-sub" id="hp-count">All recorded analyses</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="hp-clear-all" onclick="historyClearAll()" data-en="🗑 Clear All" data-tl="🗑 Burahin Lahat">🗑 Clear All</button>
+        <button class="hp-close" onclick="closeHistory()">✕</button>
+      </div>
+    </div>
+    <div id="hp-empty" class="hp-empty" style="display:none;">
+      <div style="font-size:28px;margin-bottom:10px;">📭</div>
+      <div data-en="No analyses recorded yet." data-tl="Wala pang naitalaang pagsusuri.">No analyses recorded yet.</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:5px;" data-en="Run an analysis on the map to start recording." data-tl="Magsimula ng pagsusuri sa mapa para magsimulang mag-record.">Run an analysis on the map to start recording.</div>
+    </div>
+    <div id="hp-table-wrap">
+      <table id="hp-table">
+        <thead>
+          <tr>
+            <th data-en="Date &amp; Time" data-tl="Petsa at Oras">Date &amp; Time</th>
+            <th data-en="Province" data-tl="Lalawigan">Province</th>
+            <th data-en="Temp (°C)" data-tl="Temp (°C)">Temp (°C)</th>
+            <th data-en="Rainfall (mm)" data-tl="Ulan (mm)">Rainfall (mm)</th>
+            <th data-en="Moisture (%)" data-tl="Halumigmig (%)">Moisture (%)</th>
+            <th data-en="Fertilizer (kg/ha)" data-tl="Pataba (kg/ha)">Fertilizer (kg/ha)</th>
+            <th data-en="Disease" data-tl="Sakit">Disease</th>
+            <th data-en="Yield (t/ha)" data-tl="Ani (t/ha)">Yield (t/ha)</th>
+            <th data-en="Total (tons)" data-tl="Kabuuan (tonelada)">Total (tons)</th>
+            <th data-en="Category" data-tl="Kategorya">Category</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="hp-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
 <!-- ── ADMIN PANEL ──────────────────────────────────────────────────── -->
 <div id="admin-overlay">
@@ -889,7 +1013,8 @@ PROVINCES.forEach((p,i) => {
         <input type="number" id="${p.id}-fert" placeholder="e.g. 150" step="1"><div class="hint">60–200 kg/ha</div></div>
       <div class="ig"><label data-en="Disease Severity (0-5)" data-tl="Kalubhaan ng Sakit (0-5)">Disease Severity (0-5)</label>
         <input type="number" id="${p.id}-disease" placeholder="0–5" step="1" min="0" max="5"><div class="hint">0=None, 5=Severe</div></div>
-    </div>`;
+    </div>
+    <button class="ghost-btn prov-clear-btn" id="clear-${p.id}" onclick="clearProvince('${p.id}')" style="margin-top:.55rem;font-size:8.5px;" data-en="✕ Clear ${p.name} inputs" data-tl="✕ Burahin ang input ng ${p.name}">✕ Clear ${p.name} inputs</button>`;
   cardsEl.appendChild(card);
 });
 
@@ -957,6 +1082,30 @@ function applyGlobal(){
     document.getElementById(`${p.id}-fert`).value=f;
     document.getElementById(`${p.id}-disease`).value=d;
   });
+}
+
+function clearProvince(provId){
+  ['temp','rain','moist','fert','disease'].forEach(f => {
+    const el = document.getElementById(provId + '-' + f);
+    if(el) el.value = '';
+  });
+  updateTabFillState();
+}
+
+function clearAllInputs(){
+  // Clear global defaults
+  ['g-temp','g-rain','g-moist','g-fert','g-disease'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  // Clear all per-province fields
+  PROVINCES.forEach(p => {
+    ['temp','rain','moist','fert','disease'].forEach(f => {
+      const el = document.getElementById(p.id + '-' + f);
+      if(el) el.value = '';
+    });
+  });
+  updateTabFillState();
 }
 
 // Leaflet map locked to CALABARZON region
@@ -1241,6 +1390,7 @@ async function runPrediction(){
     if(mlo) mlo.textContent=`< ${low.toFixed(2)} t/ha`;
     data.results.forEach(r=>{state.results[r.id]=r;});
     renderResults(data.results);
+    historySaveRun(data.results);
     refreshStyles();
     updateTabDots();
     document.getElementById('resultsWrap').style.display='block';
@@ -1290,81 +1440,133 @@ function updateTabDots(){
 
 
 // ── TUTORIAL ──────────────────────────────────────────────────────────────────
-const TUT_STEPS = [
+const TUT_STEPS_GUEST = [
   {
     title: 'Welcome to AGRI-GIS CALABARZON',
     body:  'This system predicts rice yield for the 5 provinces of Region IV\u2011A using a Random Forest model. Let\u2019s walk through how to get your first prediction.',
-    target: null,
-    pos: 'center'
+    target: null, pos: 'center'
   },
   {
     title: 'Step 1 \u2014 Set Global Defaults',
-    body:  'Use these fields to set the same environmental values for all provinces at once. Enter the average temperature, rainfall, soil moisture, fertilizer rate, and disease severity for the season.',
-    target: '.global-bar',
-    pos: 'right'
+    body:  'Use these fields to set the same environmental values for all provinces at once. Enter temperature, rainfall, soil moisture, fertilizer rate, and disease severity for the season.',
+    target: '.global-bar', pos: 'right', scrollTo: '.global-bar'
   },
   {
     title: 'Step 2 \u2014 Apply to All Provinces',
     body:  'Click \u201c\u2193 Apply to all provinces\u201d to copy your global values into each province\u2019s input card. You can still adjust individual provinces after.',
-    target: '.ghost-btn',
-    pos: 'right'
+    target: '.ghost-btn', pos: 'right', scrollTo: '.ghost-btn'
   },
   {
-    title: 'Step 3 \u2014 Adjust Per-Province Inputs',
+    title: 'Step 3 \u2014 Clear All Inputs',
+    body:  'Use \u201c\u2715 Clear all inputs\u201d to reset every province field to blank in one click, making it easy to start a fresh scenario.',
+    target: '#clear-all-btn', pos: 'right', scrollTo: '#clear-all-btn'
+  },
+  {
+    title: 'Step 4 \u2014 Province Tabs',
     body:  'Click a province tab (Cavite, Laguna, etc.) to switch between them. Each province can have different values if conditions vary across the region.',
-    target: '.prov-tabs',
-    pos: 'right'
+    target: '.prov-tabs', pos: 'right', scrollTo: '.prov-tabs'
   },
   {
-    title: 'Step 4 \u2014 Fine-tune Each Province',
-    body:  'The active input card shows fields for temperature, rainfall, soil moisture, fertilizer, and disease severity. Adjust these to match real or forecasted conditions for that province.',
-    target: '.input-card.active',
-    pos: 'right'
+    title: 'Step 5 \u2014 Fine-tune Each Province',
+    body:  'Each input card has fields for temperature, rainfall, soil moisture, fertilizer, and disease severity. You can also clear just this province\u2019s fields with the clear button.',
+    target: '.input-card.active', pos: 'right', scrollTo: '.input-card.active'
   },
   {
-    title: 'Step 5 \u2014 Run the Analysis',
-    body:  'Click \u201c\u25b6 Analyse & Update Map\u201d to run the Random Forest model. The system will compute yield predictions and disease pressure for all 5 provinces simultaneously.',
-    target: '#runBtn',
-    pos: 'right'
+    title: 'Step 6 \u2014 Run the Analysis',
+    body:  'Click \u201c\u25b6 Analyse & Update Map\u201d to run the Random Forest model. The system will compute yield predictions for all 5 provinces simultaneously.',
+    target: '#runBtn', pos: 'right', scrollTo: '#runBtn'
   },
   {
-    title: 'Step 6 \u2014 Read the Map',
-    body:  'The map updates with colour-coded provinces. Green = high yield, Yellow = moderate, Red = low. Hover over a province to see a quick summary, or click to open the detailed popup.',
-    target: '#map-panel',
-    pos: 'left'
+    title: 'Step 7 \u2014 Read the Map',
+    body:  'The map updates with colour-coded provinces. Green = high yield, Yellow = moderate, Red = low. Hover over a province for a quick summary, or click for full details.',
+    target: '#map-panel', pos: 'map-right'
   },
   {
-    title: 'Step 7 \u2014 View Yield Results',
-    body:  'The results panel shows predicted yield (t/ha) and estimated total production (tons) for each province, ranked by output. Click any row to open improvement tips.',
-    target: '#resultsWrap',
-    pos: 'right'
+    title: 'Step 8 \u2014 View Yield Results',
+    body:  'The results panel shows predicted yield (t/ha) and total production (tons) per province, ranked by output. Click any row to open improvement tips.',
+    target: '#resultsWrap', pos: 'right', scrollTo: '#resultsWrap'
   },
   {
-    title: 'Step 8 \u2014 Read the Improvement Tips',
-    body:  'Click any province row in the results list or the \u201cView improvement tips\u201d button in a popup. A tips drawer slides up from the sidebar with recommendations on fertilizer, irrigation, disease management, and temperature stress.',
-    target: '#sidebar',
-    pos: 'right-top'
-  },
-  {
-    title: 'Step 9 \u2014 Admin Settings (Admin Only)',
-    body:  'As an admin, you can configure rice cultivation areas for each province. Click the \u2699 Admin button to access settings that affect yield calculations and total production estimates.',
-    target: '#admin-btn',
-    pos: 'bottom'
+    title: 'Step 9 \u2014 Improvement Tips',
+    body:  'The tips drawer gives actionable recommendations on fertilizer, irrigation, disease management, and temperature stress for each province.',
+    target: '#tips-drawer', pos: 'right', scrollTo: '#tips-drawer'
   },
   {
     title: 'Step 10 \u2014 Switch Theme',
-    body:  'Use the \ud83c\udf19 Dark / \u2609\ufe0f Light button in the top bar to switch between dark and light mode at any time. Your preference is saved automatically.',
-    target: '#theme-toggle',
-    pos: 'bottom'
+    body:  'Use the \ud83c\udf19 Dark / \u2609\ufe0f Light button in the top bar to switch between dark and light mode. Your preference is saved automatically.',
+    target: '#theme-toggle', pos: 'bottom-left'
   },
   {
     title: 'You\u2019re ready!',
     body:  'That\u2019s everything you need to use AGRI-GIS CALABARZON. Click the \u201c?\u201d button in the bottom-right corner anytime to restart this tutorial.',
-    target: null,
-    pos: 'center',
-    isLast: true
+    target: null, pos: 'center', isLast: true
   },
 ];
+
+const TUT_STEPS_ADMIN = [
+  {
+    title: 'Welcome back, Admin',
+    body:  'This is the admin view of AGRI-GIS CALABARZON. You have full access including rice area configuration. Let\u2019s walk through the full workflow.',
+    target: null, pos: 'center'
+  },
+  {
+    title: 'Step 1 \u2014 Set Global Defaults',
+    body:  'Use these fields to set the same environmental values for all provinces at once. Enter temperature, rainfall, soil moisture, fertilizer rate, and disease severity.',
+    target: '.global-bar', pos: 'right', scrollTo: '.global-bar'
+  },
+  {
+    title: 'Step 2 \u2014 Apply to All Provinces',
+    body:  'Click \u201c\u2193 Apply to all provinces\u201d to copy global values into each province\u2019s input card. You can still fine-tune individual provinces after.',
+    target: '.ghost-btn', pos: 'right', scrollTo: '.ghost-btn'
+  },
+  {
+    title: 'Step 3 \u2014 Clear All Inputs',
+    body:  'Use \u201c\u2715 Clear all inputs\u201d to reset every province field to blank in one click, useful when starting a completely new scenario.',
+    target: '#clear-all-btn', pos: 'right', scrollTo: '#clear-all-btn'
+  },
+  {
+    title: 'Step 4 \u2014 Province Tabs',
+    body:  'Click a province tab (Cavite, Laguna, etc.) to switch between them. Each province can have its own environmental values.',
+    target: '.prov-tabs', pos: 'right', scrollTo: '.prov-tabs'
+  },
+  {
+    title: 'Step 5 \u2014 Fine-tune Each Province',
+    body:  'Each input card has fields for temperature, rainfall, soil moisture, fertilizer, and disease severity. You can also clear just this province\u2019s fields using the clear button.',
+    target: '.input-card.active', pos: 'right', scrollTo: '.input-card.active'
+  },
+  {
+    title: 'Step 6 \u2014 Run the Analysis',
+    body:  'Click \u201c\u25b6 Analyse & Update Map\u201d to run the Random Forest model across all 5 provinces simultaneously.',
+    target: '#runBtn', pos: 'right', scrollTo: '#runBtn'
+  },
+  {
+    title: 'Step 7 \u2014 Read the Map',
+    body:  'The map updates with colour-coded provinces: Green = high yield, Yellow = moderate, Red = low. Hover or click a province for details.',
+    target: '#map-panel', pos: 'map-right'
+  },
+  {
+    title: 'Step 8 \u2014 View Yield Results',
+    body:  'The results panel shows predicted yield (t/ha) and total production (tons) per province. Click any row to open improvement tips.',
+    target: '#resultsWrap', pos: 'right', scrollTo: '#resultsWrap'
+  },
+  {
+    title: 'Step 9 \u2014 Admin Settings',
+    body:  'As admin, click the \u2699 Admin button here in the top bar to configure the rice cultivation area (ha) per province. These values directly affect total production estimates.',
+    target: '#admin-btn', pos: 'bottom-left'
+  },
+  {
+    title: 'Step 10 \u2014 Switch Theme',
+    body:  'Use the \ud83c\udf19 Dark / \u2609\ufe0f Light button in the top bar to switch between dark and light mode. Your preference is saved automatically.',
+    target: '#theme-toggle', pos: 'bottom-left'
+  },
+  {
+    title: 'You\u2019re all set!',
+    body:  'That covers the full admin workflow. Click the \u201c?\u201d button in the bottom-right corner anytime to restart this tutorial.',
+    target: null, pos: 'center', isLast: true
+  },
+];
+
+const TUT_STEPS = CURRENT_ROLE === 'admin' ? TUT_STEPS_ADMIN : TUT_STEPS_GUEST;
 
 let tutStep = 0;
 let tutActive = false;
@@ -1407,13 +1609,27 @@ function tutScrollToTarget(targetSel){
   }
 }
 
+function tutScrollSidebarToTarget(sel){
+  // Scroll the sidebar sb-scroll container so the target is visible
+  if(!sel) return;
+  const sbScroll = document.querySelector('.sb-scroll');
+  const el = document.querySelector(sel);
+  if(!sbScroll || !el) return;
+  // Check if el is inside the scrollable sidebar
+  if(!sbScroll.contains(el)) return;
+  const sbRect  = sbScroll.getBoundingClientRect();
+  const elRect  = el.getBoundingClientRect();
+  const relTop  = elRect.top - sbRect.top + sbScroll.scrollTop;
+  const targetScroll = relTop - sbRect.height / 2 + elRect.height / 2;
+  sbScroll.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
+}
+
 function tutPosition(targetSel, pos){
   const box = document.getElementById('tut-box');
-  const pad = 18;
+  const pad = 16;
 
   // On mobile — CSS bottom sheet handles all positioning
   if(isMobile()){
-    // Clear any JS-set inline styles so CSS takes over
     box.style.top = '';
     box.style.left = '';
     box.style.transform = '';
@@ -1421,7 +1637,10 @@ function tutPosition(targetSel, pos){
     return;
   }
 
-  // Desktop positioning (unchanged)
+  // Scroll sidebar so target is visible before measuring
+  tutScrollSidebarToTarget(targetSel);
+
+  // Center fallback
   if(pos === 'center' || !targetSel){
     box.style.top  = '50%';
     box.style.left = '50%';
@@ -1433,41 +1652,67 @@ function tutPosition(targetSel, pos){
   const el = document.querySelector(targetSel);
   if(!el){ box.style.top='50%';box.style.left='50%';box.style.transform='translate(-50%,-50%)';return; }
 
-  const r   = el.getBoundingClientRect();
-  const bw  = 300;
-  const bh  = 220;
-  const vw  = window.innerWidth;
-  const vh  = window.innerHeight;
+  // Use a small delay to let sidebar scroll settle before measuring
+  setTimeout(() => {
+    const r   = el.getBoundingClientRect();
+    const bw  = 310;
+    const bh  = 230;
+    const vw  = window.innerWidth;
+    const vh  = window.innerHeight;
 
-  if(pos === 'right'){
-    let left = r.right + pad;
-    let top  = r.top + r.height/2 - bh/2;
-    if(left + bw > vw - pad) left = r.left - bw - pad;
-    top = Math.max(pad, Math.min(top, vh - bh - pad));
-    box.style.top  = top + 'px';
-    box.style.left = left + 'px';
-  } else if(pos === 'right-top'){
-    let left = r.right + pad;
-    let top  = r.top + pad;
-    if(left + bw > vw - pad) left = r.left - bw - pad;
-    top = Math.max(pad, Math.min(top, vh - bh - pad));
-    box.style.top  = top + 'px';
-    box.style.left = left + 'px';
-  } else if(pos === 'left'){
-    let left = r.left - bw - pad;
-    let top  = r.top + r.height/2 - bh/2;
-    if(left < pad) left = r.right + pad;
-    top = Math.max(pad, Math.min(top, vh - bh - pad));
-    box.style.top  = top + 'px';
-    box.style.left = left + 'px';
-  } else if(pos === 'bottom'){
-    let top  = r.bottom + pad;
-    let left = r.left + r.width/2 - bw/2;
-    if(top + bh > vh - pad) top = r.top - bh - pad;
-    left = Math.max(pad, Math.min(left, vw - bw - pad));
-    box.style.top  = top + 'px';
-    box.style.left = left + 'px';
-  }
+    // Clamp helper
+    const clampX = l => Math.max(pad, Math.min(l, vw - bw - pad));
+    const clampY = t => Math.max(54 + pad, Math.min(t, vh - bh - pad)); // 54 = topbar height
+
+    let top, left;
+
+    if(pos === 'right' || pos === 'right-top'){
+      // Place box to the RIGHT of target (into the map area)
+      left = r.right + pad;
+      // If it overflows the viewport right edge, flip to left of target
+      if(left + bw > vw - pad) left = r.left - bw - pad;
+      top = (pos === 'right-top') ? r.top : (r.top + r.height/2 - bh/2);
+      box.style.top  = clampY(top) + 'px';
+      box.style.left = clampX(left) + 'px';
+
+    } else if(pos === 'left'){
+      // Place box to the LEFT of target — used for map panel (right side)
+      left = r.left - bw - pad;
+      if(left < pad) left = r.right + pad;
+      top = r.top + r.height/2 - bh/2;
+      box.style.top  = clampY(top) + 'px';
+      box.style.left = clampX(left) + 'px';
+
+    } else if(pos === 'bottom'){
+      // Place box BELOW target — used for topbar buttons
+      top  = r.bottom + pad;
+      left = r.left + r.width/2 - bw/2;
+      if(top + bh > vh - pad) top = r.top - bh - pad;
+      box.style.top  = clampY(top) + 'px';
+      box.style.left = clampX(left) + 'px';
+
+    } else if(pos === 'map-right'){
+
+    } else if(pos === 'bottom-left'){
+      // Place box BELOW and to the LEFT of target — for topbar-right buttons
+      top  = r.bottom + pad;
+      left = r.right - bw;  // right-align box with target
+      if(top + bh > vh - pad) top = r.top - bh - pad;
+      box.style.top  = clampY(top) + 'px';
+      box.style.left = clampX(left) + 'px';
+      // Place box in centre-right of the map panel
+      const mapPanel = document.getElementById('map-panel');
+      if(mapPanel){
+        const mr = mapPanel.getBoundingClientRect();
+        left = mr.left + (mr.width - bw) / 2;
+        top  = mr.top  + (mr.height - bh) / 2;
+      } else {
+        left = vw/2; top = vh/2;
+      }
+      box.style.top  = clampY(top) + 'px';
+      box.style.left = clampX(left) + 'px';
+    }
+  }, pos === 'right' || pos === 'right-top' ? 120 : 0);
 }
 
 function tutRender(){
@@ -1477,6 +1722,7 @@ function tutRender(){
   document.getElementById('tut-body').textContent  = s.body;
   document.getElementById('tut-next-btn').textContent = s.isLast ? 'Get started ✓' : 'Next \u2192';
   tutBuildDots();
+  if(s.scrollTo) tutScrollSidebarToTarget(s.scrollTo);
   tutHighlight(s.target || null);
   tutPosition(s.target || null, s.pos || 'center');
 }
@@ -1513,7 +1759,7 @@ function tutRestart(){
 
 // Auto-start on first visit
 // Versioned key — bump TUT_VERSION to reset tutorial for all users
-const TUT_VERSION = 'v1';
+const TUT_VERSION = 'v4';
 const TUT_KEY = 'tutDone_' + TUT_VERSION;
 
 function tutInit(){
@@ -1563,7 +1809,7 @@ if(document.readyState === 'loading'){
     roleEl.classList.add('admin');
     document.getElementById('admin-badge').style.display = 'flex';
     // Show admin settings button
-    document.getElementById('admin-btn-wrap').style.display = 'block';
+    document.getElementById('admin-btn-wrap').style.display = 'flex';
   } else {
     // Guest: show Admin Login button instead
     document.getElementById('admin-login-btn').style.display = 'block';
@@ -1668,6 +1914,113 @@ document.getElementById('admin-overlay').addEventListener('click', function(e){
   if(e.target === this) closeAdmin();
 });
 
+// ── ANALYSIS HISTORY ─────────────────────────────────────────────────────────
+const HISTORY_KEY = 'agrigis_history_v1';
+
+function historyLoad(){
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); }
+  catch(e){ return []; }
+}
+function historySave(arr){
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(arr));
+}
+
+// Called after each successful prediction run
+function historySaveRun(results){
+  if(CURRENT_ROLE !== 'admin') return; // only persist for admin
+  const history = historyLoad();
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-PH', {year:'numeric',month:'short',day:'numeric'});
+  const timeStr = now.toLocaleTimeString('en-PH', {hour:'2-digit',minute:'2-digit'});
+  results.forEach(r => {
+    history.unshift({
+      id:        Date.now() + '_' + r.id,
+      date:      dateStr,
+      time:      timeStr,
+      province:  r.name,
+      temp:      r.inputs.avg_temp,
+      rain:      r.inputs.rainfall_mm,
+      moisture:  r.inputs.soil_moisture,
+      fert:      r.inputs.fertilizer_kg_ha,
+      disease:   r.inputs.disease_severity,
+      yield:     r.yield,
+      total:     r.total_yield_tons,
+      category:  r.category,
+    });
+  });
+  historySave(history);
+}
+
+function historyDelete(id){
+  const history = historyLoad().filter(h => h.id !== id);
+  historySave(history);
+  renderHistoryTable();
+}
+
+function historyClearAll(){
+  if(!confirm('Clear all analysis history? This cannot be undone.')) return;
+  historySave([]);
+  renderHistoryTable();
+}
+
+function renderHistoryTable(){
+  const history = historyLoad();
+  const tbody   = document.getElementById('hp-tbody');
+  const empty   = document.getElementById('hp-empty');
+  const tableW  = document.getElementById('hp-table-wrap');
+  const countEl = document.getElementById('hp-count');
+
+  const total = history.length;
+  countEl.textContent = total === 0
+    ? 'No analyses recorded yet'
+    : `${total} record${total !== 1 ? 's' : ''} — most recent first`;
+
+  if(total === 0){
+    empty.style.display  = 'block';
+    tableW.style.display = 'none';
+    return;
+  }
+  empty.style.display  = 'none';
+  tableW.style.display = 'block';
+
+  tbody.innerHTML = '';
+  history.forEach(h => {
+    const catClass = h.category;  // 'high' | 'moderate' | 'low'
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <div class="hp-date-day">${h.date}</div>
+        <div class="hp-date">${h.time}</div>
+      </td>
+      <td style="font-weight:600;">${h.province}</td>
+      <td>${h.temp}</td>
+      <td>${h.rain}</td>
+      <td>${h.moisture}</td>
+      <td>${h.fert}</td>
+      <td>${h.disease}/5</td>
+      <td style="font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;color:var(--${catClass === 'high' ? 'green' : catClass === 'moderate' ? 'yellow' : 'red'})">
+        ${h.yield.toFixed(2)}
+      </td>
+      <td>${h.total.toLocaleString()}</td>
+      <td><span class="hp-cat ${catClass}">${catClass}</span></td>
+      <td><button class="hp-del" title="Remove this record" onclick="historyDelete('${h.id}')">🗑</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function openHistory(){
+  renderHistoryTable();
+  document.getElementById('history-overlay').classList.add('open');
+}
+function closeHistory(){
+  document.getElementById('history-overlay').classList.remove('open');
+}
+document.getElementById('history-overlay').addEventListener('click', function(e){
+  if(e.target === this) closeHistory();
+});
+
+
+
 
 // ── Language Toggle ───────────────────────────────────────────────────────────
 const TRANSLATIONS = {
@@ -1703,18 +2056,19 @@ const TRANSLATIONS = {
     highLeg:             h => `\u2265 ${h} t/ha`,
     modLeg:              (l,h) => `${l}\u2013${h} t/ha`,
     lowLeg:              l => `< ${l} t/ha`,
-    // Tutorial steps
+    // Tutorial steps — must match TUT_STEPS_GUEST length (12 steps, index 0–11)
     tutSteps: [
       { title: 'Welcome to AGRI-GIS CALABARZON', body: 'This system predicts rice yield for the 5 provinces of Region IV\u2011A using a Random Forest model. Let\u2019s walk through how to get your first prediction.' },
-      { title: 'Step 1 \u2014 Set Global Defaults', body: 'Use these fields to set the same environmental values for all provinces at once. Enter the average temperature, rainfall, soil moisture, fertilizer rate, and disease severity for the season.' },
+      { title: 'Step 1 \u2014 Set Global Defaults', body: 'Use these fields to set the same environmental values for all provinces at once. Enter temperature, rainfall, soil moisture, fertilizer rate, and disease severity for the season.' },
       { title: 'Step 2 \u2014 Apply to All Provinces', body: 'Click \u201c\u2193 Apply to all provinces\u201d to copy your global values into each province\u2019s input card. You can still adjust individual provinces after.' },
-      { title: 'Step 3 \u2014 Adjust Per-Province Inputs', body: 'Click a province tab (Cavite, Laguna, etc.) to switch between them. Each province can have different values if conditions vary across the region.' },
-      { title: 'Step 4 \u2014 Fine-tune Each Province', body: 'The active input card shows fields for temperature, rainfall, soil moisture, fertilizer, and disease severity. Leave a province blank to exclude it from the analysis.' },
-      { title: 'Step 5 \u2014 Run the Analysis', body: 'Click \u201c\u25b6 Analyse\u201d to run the Random Forest model. Only provinces with filled inputs will be predicted.' },
-      { title: 'Step 6 \u2014 Read the Map', body: 'The map updates with colour-coded provinces. Green = high yield, Yellow = moderate, Red = low. Tap a province to open the detailed popup.' },
-      { title: 'Step 7 \u2014 View Yield Results', body: 'The results panel shows predicted yield (t/ha) and estimated total production for each analysed province. Click any row to open improvement tips.' },
-      { title: 'Step 8 \u2014 Read the Improvement Tips', body: 'Click any province row or the \u201cView improvement tips\u201d button. A tips drawer slides up with recommendations on fertilizer, irrigation, and disease management.' },
-      { title: 'Step 9 \u2014 Switch Theme', body: 'Use the \ud83c\udf19 Dark / \u2609\ufe0f Light button to switch between dark and light mode. Your preference is saved automatically.' },
+      { title: 'Step 3 \u2014 Clear All Inputs', body: 'Use \u201c\u2715 Clear all inputs\u201d to reset every province field to blank in one click, making it easy to start a fresh scenario.' },
+      { title: 'Step 4 \u2014 Province Tabs', body: 'Click a province tab (Cavite, Laguna, etc.) to switch between them. Each province can have different values if conditions vary across the region.' },
+      { title: 'Step 5 \u2014 Fine-tune Each Province', body: 'Each input card has fields for temperature, rainfall, soil moisture, fertilizer, and disease severity. You can also clear just this province\u2019s fields with the clear button.' },
+      { title: 'Step 6 \u2014 Run the Analysis', body: 'Click \u201c\u25b6 Analyse & Update Map\u201d to run the Random Forest model. The system will compute yield predictions for all 5 provinces simultaneously.' },
+      { title: 'Step 7 \u2014 Read the Map', body: 'The map updates with colour-coded provinces. Green = high yield, Yellow = moderate, Red = low. Hover over a province for a quick summary, or click for full details.' },
+      { title: 'Step 8 \u2014 View Yield Results', body: 'The results panel shows predicted yield (t/ha) and total production (tons) per province, ranked by output. Click any row to open improvement tips.' },
+      { title: 'Step 9 \u2014 Improvement Tips', body: 'The tips drawer gives actionable recommendations on fertilizer, irrigation, disease management, and temperature stress for each province.' },
+      { title: 'Step 10 \u2014 Switch Theme', body: 'Use the \ud83c\udf19 Dark / \u2609\ufe0f Light button in the top bar to switch between dark and light mode. Your preference is saved automatically.' },
       { title: "You're ready!", body: 'That\u2019s everything you need to use AGRI-GIS CALABARZON. Click the \u201c?\u201d button in the bottom-right corner anytime to restart this tutorial.', isLast: true },
     ]
   },
@@ -1748,15 +2102,16 @@ const TRANSLATIONS = {
     lowLeg:              l => `< ${l} t/ha`,
     tutSteps: [
       { title: 'Maligayang Pagdating sa AGRI-GIS CALABARZON', body: 'Ang sistemang ito ay nagtataya ng ani ng palay para sa 5 lalawigan ng Rehiyon IV-A gamit ang Random Forest na modelo. Alamin natin kung paano makakuha ng iyong unang hula.' },
-      { title: 'Hakbang 1 \u2014 Itakda ang Mga Pandaigdigang Default', body: 'Gamitin ang mga field na ito para magtakda ng parehong mga halaga para sa lahat ng lalawigan nang sabay. Ilagay ang average na temperatura, pag-ulan, kahalumigmigan ng lupa, pataba, at kalubhaan ng sakit.' },
+      { title: 'Hakbang 1 \u2014 Itakda ang Mga Pandaigdigang Default', body: 'Gamitin ang mga field na ito para magtakda ng parehong mga halaga para sa lahat ng lalawigan nang sabay. Ilagay ang temperatura, pag-ulan, kahalumigmigan ng lupa, pataba, at kalubhaan ng sakit.' },
       { title: 'Hakbang 2 \u2014 Ilapat sa Lahat ng Lalawigan', body: 'I-click ang "\u2193 Ilapat sa lahat ng lalawigan" para kopyahin ang mga pandaigdigang halaga sa bawat input card ng lalawigan. Maaari ka pa ring mag-adjust ng mga indibidwal na lalawigan pagkatapos.' },
-      { title: 'Hakbang 3 \u2014 I-adjust ang Mga Input Bawat Lalawigan', body: 'I-click ang tab ng lalawigan (Cavite, Laguna, atbp.) para lumipat sa pagitan nila. Ang bawat lalawigan ay maaaring magkaroon ng iba\'t ibang halaga.' },
-      { title: 'Hakbang 4 \u2014 I-fine-tune ang Bawat Lalawigan', body: 'Ipinapakita ng aktibong input card ang mga field para sa temperatura, pag-ulan, kahalumigmigan ng lupa, pataba, at kalubhaan ng sakit. Iwanan ang blangko para hindi isama ang lalawigan.' },
-      { title: 'Hakbang 5 \u2014 Simulan ang Pagsusuri', body: 'I-click ang "\u25b6 Suriin" para patakbuhin ang Random Forest na modelo. Ang mga lawigang may mga napunang input lamang ang mahuhulaan.' },
-      { title: 'Hakbang 6 \u2014 Basahin ang Mapa', body: 'Ina-update ang mapa gamit ang mga may kulay na lalawigan. Berde = mataas na ani, Dilaw = katamtaman, Pula = mababa. I-tap ang isang lalawigan para makita ang detalyadong popup.' },
-      { title: 'Hakbang 7 \u2014 Tingnan ang Mga Resulta ng Ani', body: 'Ipinapakita ng results panel ang hinulaang ani (t/ha) at tinatantiyang kabuuang produksyon para sa bawat nasuring lalawigan.' },
-      { title: 'Hakbang 8 \u2014 Basahin ang Mga Tip sa Pagpapabuti', body: 'I-click ang anumang hilera ng lalawigan o ang "Tingnan ang mga tip" na button. Lilitaw ang tips drawer na may mga rekomendasyon para sa pataba, patubig, at pamamahala ng sakit.' },
-      { title: 'Hakbang 9 \u2014 Palitan ang Tema', body: 'Gamitin ang \ud83c\udf19 Madilim / \u2609\ufe0f Maliwanag na button para lumipat sa pagitan ng madilim at maliwanag na mode. Awtomatikong nase-save ang iyong kagustuhan.' },
+      { title: 'Hakbang 3 \u2014 Burahin Lahat ng Input', body: 'Gamitin ang "\u2715 Burahin lahat ng input" para i-reset ang lahat ng field ng lalawigan pabalik sa blangko nang isang click, na nagpapadali ng pagsisimula ng bagong senaryo.' },
+      { title: 'Hakbang 4 \u2014 Mga Tab ng Lalawigan', body: 'I-click ang tab ng lalawigan (Cavite, Laguna, atbp.) para lumipat sa pagitan nila. Ang bawat lalawigan ay maaaring magkaroon ng iba\'t ibang halaga.' },
+      { title: 'Hakbang 5 \u2014 I-fine-tune ang Bawat Lalawigan', body: 'Ang bawat input card ay may mga field para sa temperatura, pag-ulan, kahalumigmigan ng lupa, pataba, at kalubhaan ng sakit. Maaari ka ring mag-clear ng mga input ng isang lalawigan gamit ang clear button.' },
+      { title: 'Hakbang 6 \u2014 Simulan ang Pagsusuri', body: 'I-click ang "\u25b6 Suriin at I-update ang Mapa" para patakbuhin ang Random Forest na modelo sa lahat ng 5 lalawigan nang sabay.' },
+      { title: 'Hakbang 7 \u2014 Basahin ang Mapa', body: 'Ina-update ang mapa gamit ang mga may kulay na lalawigan. Berde = mataas na ani, Dilaw = katamtaman, Pula = mababa. Mag-hover o mag-click ng lalawigan para sa mga detalye.' },
+      { title: 'Hakbang 8 \u2014 Tingnan ang Mga Resulta ng Ani', body: 'Ipinapakita ng results panel ang hinulaang ani (t/ha) at kabuuang produksyon (tonelada) bawat lalawigan. I-click ang anumang hilera para makita ang mga tip sa pagpapabuti.' },
+      { title: 'Hakbang 9 \u2014 Mga Tip sa Pagpapabuti', body: 'Ang tips drawer ay nagbibigay ng mga rekomendasyon para sa pataba, patubig, pamamahala ng sakit, at stress sa temperatura para sa bawat lalawigan.' },
+      { title: 'Hakbang 10 \u2014 Palitan ang Tema', body: 'Gamitin ang \ud83c\udf19 Madilim / \u2609\ufe0f Maliwanag na button sa tuktok na bar para lumipat sa pagitan ng madilim at maliwanag na mode. Awtomatikong nase-save ang iyong kagustuhan.' },
       { title: 'Handa ka na!', body: 'Iyon na ang lahat ng kailangan mo para gamitin ang AGRI-GIS CALABARZON. I-click ang "?" na button sa kanang-ibabang sulok anumang oras para i-restart ang tutorial na ito.', isLast: true },
     ]
   }
@@ -1849,6 +2204,7 @@ tutRender = function(){
   document.getElementById('tut-body').textContent   = s.body;
   document.getElementById('tut-next-btn').textContent = s.isLast ? (currentLang === 'tl' ? 'Magsimula ✓' : 'Get started \u2713') : (currentLang === 'tl' ? 'Susunod \u2192' : 'Next \u2192');
   tutBuildDots();
+  if(TUT_STEPS[tutStep] && TUT_STEPS[tutStep].scrollTo) tutScrollSidebarToTarget(TUT_STEPS[tutStep].scrollTo);
   tutHighlight(TUT_STEPS[tutStep] ? TUT_STEPS[tutStep].target : null);
   tutPosition(TUT_STEPS[tutStep] ? TUT_STEPS[tutStep].target : null, TUT_STEPS[tutStep] ? TUT_STEPS[tutStep].pos : 'center');
 };
