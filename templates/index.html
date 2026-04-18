@@ -38,25 +38,53 @@ html,body{height:100%;overflow:hidden;background:var(--ink);color:var(--text);
   /* App shell — full scrollable page instead of fixed viewport */
   html,body{height:auto;overflow:auto;}
   #app{display:flex;flex-direction:column;height:auto;min-height:100vh;}
+  /* topbar is auto-height on mobile — remove fixed grid row */
+  #topbar{position:relative;z-index:1000;}
   #main{display:flex;flex-direction:column;overflow:visible;align-items:stretch;}
 
-  /* Topbar — tighter, single row */
-  #topbar{padding:0 .9rem;gap:.6rem;height:50px;flex-shrink:0;}
-  .topbar-right{gap:6px;flex-shrink:0;}
+  /* Topbar — two rows on mobile: brand top, buttons bottom */
+  #topbar{
+    padding:0;
+    height:auto;
+    flex-direction:column;
+    align-items:stretch;
+    gap:0;
+    flex-shrink:0;
+  }
+  /* Row 1: brand */
+  .brand{
+    padding:8px 12px 6px;
+    border-bottom:1px solid var(--border);
+  }
+  .brand-name{font-size:10px;}
+  .brand-sub{font-size:8.5px;margin-top:1px;}
+  /* Row 2: action buttons */
+  .topbar-right{
+    padding:5px 10px;
+    gap:5px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    flex-shrink:0;
+  }
   .top-pills{display:none!important;}
-  .brand-sub{display:none;}
-  .brand-name{font-size:9.5px;}
-  .top-pills{display:none;}
-  
-#lang-toggle{
-  background:none;border:1px solid var(--border2);border-radius:20px;
-  color:var(--text2);cursor:pointer;font-size:10.5px;
-  padding:4px 11px;transition:all .2s;white-space:nowrap;flex-shrink:0;
-  font-family:'Instrument Sans',sans-serif;font-weight:500;
-}
-#lang-toggle:hover{background:var(--ink3);color:var(--text);}
-#theme-toggle{padding:4px 9px;font-size:10px;}
+  /* Shrink all topbar buttons on mobile */
+  #admin-btn-wrap button,
+  #admin-login-btn,
+  .logout-btn{font-size:8.5px!important;padding:4px 8px!important;}
+  #lang-toggle{
+    background:none;border:1px solid var(--border2);border-radius:20px;
+    color:var(--text2);cursor:pointer;font-size:9px;
+    padding:3px 8px;white-space:nowrap;flex-shrink:0;
+    font-family:'Instrument Sans',sans-serif;font-weight:500;
+  }
+  /* Theme toggle: icon only */
+  #theme-toggle{padding:4px 8px;font-size:10px;}
   #theme-toggle .tog-icon{font-size:12px;}
+  #theme-toggle #tog-label{display:none;}
+  /* Hide user-info (name/role) — too wide */
+  .user-info{display:none!important;}
+  /* Admin badge inline */
+  #admin-badge{gap:5px;}
 
   /* Map — fixed height on mobile */
   #map-panel{order:1;height:55vw;min-height:220px;max-height:320px;flex-shrink:0;}
@@ -705,9 +733,77 @@ html.light .mobile-legend{background:var(--ink2);border-color:var(--border);}
 .hp-del:hover{background:rgba(239,68,68,.15);color:#fca5a5;}
 .hp-date{font-size:10.5px;color:var(--text2);}
 .hp-date-day{font-weight:600;color:var(--text);}
+.hp-by{
+  display:inline-block;font-size:8px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;padding:2px 7px;border-radius:20px;
+}
+.hp-by-admin{background:rgba(212,168,67,.15);color:var(--rice);border:1px solid rgba(212,168,67,.35);}
+.hp-by-guest{background:rgba(139,148,158,.1);color:var(--text2);border:1px solid var(--border2);}
+#hp-cards{display:none;}
+
 @media(max-width:860px){
   #history-panel{max-width:100%;}
   #hp-table th,#hp-table td{padding:8px 10px;font-size:11px;}
+}
+
+/* ── HISTORY: MOBILE (≤540px) — swap table for cards ───────────────────── */
+@media(max-width:540px){
+  #history-overlay{
+    padding:0;
+    align-items:flex-end;
+  }
+  #history-panel{
+    border-radius:18px 18px 0 0;
+    max-height:88vh;
+    width:100%;
+    max-width:100%;
+  }
+  .hp-hd{
+    padding:16px 16px 12px;
+  }
+  .hp-title{font-size:12px;}
+  .hp-clear-all{font-size:8px;padding:4px 9px;}
+
+  /* Hide the full table on mobile */
+  #hp-table-wrap{display:none!important;}
+
+  /* Show card list instead */
+  #hp-cards{
+    display:flex!important;flex-direction:column;gap:8px;
+    padding:12px 14px 20px;overflow-y:auto;
+    max-height:calc(88vh - 90px);
+  }
+  .hp-card{
+    background:var(--ink3);border:1px solid var(--border2);
+    border-radius:10px;padding:12px 13px;
+  }
+  .hp-card-hd{
+    display:flex;justify-content:space-between;align-items:flex-start;
+    margin-bottom:8px;
+  }
+  .hp-card-prov{
+    font-family:'Unbounded',sans-serif;font-size:11px;font-weight:700;color:#fff;
+  }
+  .hp-card-meta{
+    font-size:9.5px;color:var(--text2);margin-top:2px;
+    display:flex;align-items:center;gap:5px;flex-wrap:wrap;
+  }
+  .hp-card-yield{
+    font-family:'Unbounded',sans-serif;font-size:20px;font-weight:800;
+    letter-spacing:-.02em;line-height:1;
+  }
+  .hp-card-yield-lbl{font-size:8.5px;color:var(--text2);margin-top:2px;}
+  .hp-card-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;
+    margin-top:8px;padding-top:8px;border-top:1px solid var(--border);
+  }
+  .hp-card-field{display:flex;flex-direction:column;gap:1px;}
+  .hp-card-label{font-size:7.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);}
+  .hp-card-val{font-size:11px;color:var(--text);}
+  .hp-card-footer{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-top:8px;padding-top:8px;border-top:1px solid var(--border);
+  }
 }
 
 </style>
@@ -871,11 +967,14 @@ html.light .mobile-legend{background:var(--ink2);border-color:var(--border);}
       <div data-en="No analyses recorded yet." data-tl="Wala pang naitalaang pagsusuri.">No analyses recorded yet.</div>
       <div style="font-size:11px;color:var(--muted);margin-top:5px;" data-en="Run an analysis on the map to start recording." data-tl="Magsimula ng pagsusuri sa mapa para magsimulang mag-record.">Run an analysis on the map to start recording.</div>
     </div>
+    <div id="hp-cards"></div>
+
     <div id="hp-table-wrap">
       <table id="hp-table">
         <thead>
           <tr>
             <th data-en="Date &amp; Time" data-tl="Petsa at Oras">Date &amp; Time</th>
+            <th data-en="By" data-tl="Ni">By</th>
             <th data-en="Province" data-tl="Lalawigan">Province</th>
             <th data-en="Temp (°C)" data-tl="Temp (°C)">Temp (°C)</th>
             <th data-en="Rainfall (mm)" data-tl="Ulan (mm)">Rainfall (mm)</th>
@@ -1927,25 +2026,26 @@ function historySave(arr){
 
 // Called after each successful prediction run
 function historySaveRun(results){
-  if(CURRENT_ROLE !== 'admin') return; // only persist for admin
+  // Always record — guest analyses are visible to admin
   const history = historyLoad();
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-PH', {year:'numeric',month:'short',day:'numeric'});
   const timeStr = now.toLocaleTimeString('en-PH', {hour:'2-digit',minute:'2-digit'});
   results.forEach(r => {
     history.unshift({
-      id:        Date.now() + '_' + r.id,
-      date:      dateStr,
-      time:      timeStr,
-      province:  r.name,
-      temp:      r.inputs.avg_temp,
-      rain:      r.inputs.rainfall_mm,
-      moisture:  r.inputs.soil_moisture,
-      fert:      r.inputs.fertilizer_kg_ha,
-      disease:   r.inputs.disease_severity,
-      yield:     r.yield,
-      total:     r.total_yield_tons,
-      category:  r.category,
+      id:         Date.now() + '_' + r.id,
+      date:       dateStr,
+      time:       timeStr,
+      recordedBy: CURRENT_ROLE === 'admin' ? 'Admin' : 'Guest',
+      province:   r.name,
+      temp:       r.inputs.avg_temp,
+      rain:       r.inputs.rainfall_mm,
+      moisture:   r.inputs.soil_moisture,
+      fert:       r.inputs.fertilizer_kg_ha,
+      disease:    r.inputs.disease_severity,
+      yield:      r.yield,
+      total:      r.total_yield_tons,
+      category:   r.category,
     });
   });
   historySave(history);
@@ -1966,6 +2066,7 @@ function historyClearAll(){
 function renderHistoryTable(){
   const history = historyLoad();
   const tbody   = document.getElementById('hp-tbody');
+  const cards   = document.getElementById('hp-cards');
   const empty   = document.getElementById('hp-empty');
   const tableW  = document.getElementById('hp-table-wrap');
   const countEl = document.getElementById('hp-count');
@@ -1978,33 +2079,75 @@ function renderHistoryTable(){
   if(total === 0){
     empty.style.display  = 'block';
     tableW.style.display = 'none';
+    cards.innerHTML = '';
     return;
   }
   empty.style.display  = 'none';
   tableW.style.display = 'block';
 
+  const catColor = c => c === 'high' ? 'var(--green)' : c === 'moderate' ? 'var(--yellow)' : 'var(--red)';
+
+  // ── Desktop table rows ──────────────────────────────────────────────────
   tbody.innerHTML = '';
   history.forEach(h => {
-    const catClass = h.category;  // 'high' | 'moderate' | 'low'
+    const catClass = h.category;
+    const by = h.recordedBy || 'Guest';
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>
         <div class="hp-date-day">${h.date}</div>
         <div class="hp-date">${h.time}</div>
       </td>
+      <td><span class="hp-by hp-by-${by.toLowerCase()}">${by}</span></td>
       <td style="font-weight:600;">${h.province}</td>
       <td>${h.temp}</td>
       <td>${h.rain}</td>
       <td>${h.moisture}</td>
       <td>${h.fert}</td>
       <td>${h.disease}/5</td>
-      <td style="font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;color:var(--${catClass === 'high' ? 'green' : catClass === 'moderate' ? 'yellow' : 'red'})">
+      <td style="font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;color:${catColor(catClass)}">
         ${h.yield.toFixed(2)}
       </td>
       <td>${h.total.toLocaleString()}</td>
       <td><span class="hp-cat ${catClass}">${catClass}</span></td>
       <td><button class="hp-del" title="Remove this record" onclick="historyDelete('${h.id}')">🗑</button></td>`;
     tbody.appendChild(tr);
+  });
+
+  // ── Mobile cards ────────────────────────────────────────────────────────
+  cards.innerHTML = '';
+  history.forEach(h => {
+    const catClass = h.category;
+    const by = h.recordedBy || 'Guest';
+    const card = document.createElement('div');
+    card.className = 'hp-card';
+    card.innerHTML = `
+      <div class="hp-card-hd">
+        <div>
+          <div class="hp-card-prov">${h.province}</div>
+          <div class="hp-card-meta">
+            <span>${h.date} · ${h.time}</span>
+            <span class="hp-by hp-by-${by.toLowerCase()}">${by}</span>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div class="hp-card-yield" style="color:${catColor(catClass)}">${h.yield.toFixed(2)}<span style="font-size:11px;font-weight:400;margin-left:2px;">t/ha</span></div>
+          <div class="hp-card-yield-lbl">Yield</div>
+        </div>
+      </div>
+      <div class="hp-card-grid">
+        <div class="hp-card-field"><span class="hp-card-label">Temp</span><span class="hp-card-val">${h.temp} °C</span></div>
+        <div class="hp-card-field"><span class="hp-card-label">Rainfall</span><span class="hp-card-val">${h.rain} mm</span></div>
+        <div class="hp-card-field"><span class="hp-card-label">Moisture</span><span class="hp-card-val">${h.moisture}%</span></div>
+        <div class="hp-card-field"><span class="hp-card-label">Fertilizer</span><span class="hp-card-val">${h.fert} kg/ha</span></div>
+        <div class="hp-card-field"><span class="hp-card-label">Disease</span><span class="hp-card-val">${h.disease}/5</span></div>
+        <div class="hp-card-field"><span class="hp-card-label">Total Prod.</span><span class="hp-card-val">${h.total.toLocaleString()} tons</span></div>
+      </div>
+      <div class="hp-card-footer">
+        <span class="hp-cat ${catClass}">${catClass}</span>
+        <button class="hp-del" onclick="historyDelete('${h.id}')" title="Remove">🗑 Remove</button>
+      </div>`;
+    cards.appendChild(card);
   });
 }
 
