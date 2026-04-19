@@ -74,6 +74,9 @@ body{
 .login-btn:active{transform:scale(.98);}
 .login-btn:disabled{opacity:.4;cursor:not-allowed;}
 
+.back-btn:hover{opacity:.75;}
+.back-btn:active{transform:scale(.95);}
+
 /* ── ERROR ── */
 .error-msg{
   background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);
@@ -120,6 +123,9 @@ body{
   </div>
 
   <button onclick="toggleLoginLang()" id="login-lang-btn" style="position:absolute;top:20px;right:20px;background:none;border:1px solid var(--border2);border-radius:20px;color:var(--text2);cursor:pointer;font-size:10.5px;padding:4px 11px;font-family:'Instrument Sans',sans-serif;">🇵🇭 Filipino</button>
+  <button onclick="goBack()" class="back-btn" id="backBtn" style="position:absolute;top:20px;left:20px;background:var(--ink3);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);font-family:'Instrument Sans',sans-serif;font-size:10px;font-weight:500;padding:6px 12px;cursor:pointer;transition:opacity .2s,transform .1s;display:flex;align-items:center;gap:4px;">
+    ← Back
+  </button>
   <div class="heading" id="login-heading">Sign in</div>
   <div class="subheading" id="login-sub">Enter admin credentials to access admin settings.</div>
 
@@ -150,6 +156,11 @@ body{
 document.addEventListener('keydown', e => {
   if(e.key === 'Enter') doLogin();
 });
+
+// Back button functionality
+function goBack() {
+  window.history.back();
+}
 
 async function doLogin(){
   const btn  = document.getElementById('loginBtn');

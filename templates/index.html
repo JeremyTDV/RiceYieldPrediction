@@ -1605,7 +1605,7 @@ const TUT_STEPS_GUEST = [
 const TUT_STEPS_ADMIN = [
   {
     title: 'Welcome back, Admin',
-    body:  'This is the admin view of AGRI-GIS CALABARZON. You have full access including rice area configuration. Let\u2019s walk through the full workflow.',
+    body:  'This is the admin view of AGRI-GIS CALABARZON. You have full access including prediction, rice area configuration, and analysis history. Let\u2019s walk through the full workflow.',
     target: null, pos: 'center'
   },
   {
@@ -1640,27 +1640,32 @@ const TUT_STEPS_ADMIN = [
   },
   {
     title: 'Step 7 \u2014 Read the Map',
-    body:  'The map updates with colour-coded provinces: Green = high yield, Yellow = moderate, Red = low. Hover or click a province for details.',
+    body:  'The map updates with colour-coded provinces: Green = high yield, Yellow = moderate, Red = low. Hover or click a province for full prediction details.',
     target: '#map-panel', pos: 'map-right'
   },
   {
     title: 'Step 8 \u2014 View Yield Results',
-    body:  'The results panel shows predicted yield (t/ha) and total production (tons) per province. Click any row to open improvement tips.',
+    body:  'The results panel shows predicted yield (t/ha) and total production (tons) per province. Click any row to open improvement tips for that province.',
     target: '#resultsWrap', pos: 'right', scrollTo: '#resultsWrap'
   },
   {
-    title: 'Step 9 \u2014 Admin Settings',
-    body:  'As admin, click the \u2699 Admin button here in the top bar to configure the rice cultivation area (ha) per province. These values directly affect total production estimates.',
+    title: 'Step 9 \u2014 Analysis History',
+    body:  'Click the \ud83d\udccb History button to open the analysis history dashboard. Every prediction run is automatically recorded here with its date, time, inputs, and results. You can delete individual records or clear all history.',
+    target: '#history-btn', pos: 'bottom-left'
+  },
+  {
+    title: 'Step 10 \u2014 Admin Settings',
+    body:  'Click the \u2699 Admin button to configure the rice cultivation area (ha) per province. These values directly affect total production estimates in all calculations.',
     target: '#admin-btn', pos: 'bottom-left'
   },
   {
-    title: 'Step 10 \u2014 Switch Theme',
+    title: 'Step 11 \u2014 Switch Theme',
     body:  'Use the \ud83c\udf19 Dark / \u2609\ufe0f Light button in the top bar to switch between dark and light mode. Your preference is saved automatically.',
     target: '#theme-toggle', pos: 'bottom-left'
   },
   {
     title: 'You\u2019re all set!',
-    body:  'That covers the full admin workflow. Click the \u201c?\u201d button in the bottom-right corner anytime to restart this tutorial.',
+    body:  'That covers the full admin workflow for AGRI-GIS CALABARZON. Click the \u201c?\u201d button in the bottom-right corner anytime to restart this tutorial.',
     target: null, pos: 'center', isLast: true
   },
 ];
@@ -1791,15 +1796,7 @@ function tutPosition(targetSel, pos){
       box.style.left = clampX(left) + 'px';
 
     } else if(pos === 'map-right'){
-
-    } else if(pos === 'bottom-left'){
-      // Place box BELOW and to the LEFT of target — for topbar-right buttons
-      top  = r.bottom + pad;
-      left = r.right - bw;  // right-align box with target
-      if(top + bh > vh - pad) top = r.top - bh - pad;
-      box.style.top  = clampY(top) + 'px';
-      box.style.left = clampX(left) + 'px';
-      // Place box in centre-right of the map panel
+      // Place box in centre of the map panel
       const mapPanel = document.getElementById('map-panel');
       if(mapPanel){
         const mr = mapPanel.getBoundingClientRect();
@@ -1808,6 +1805,12 @@ function tutPosition(targetSel, pos){
       } else {
         left = vw/2; top = vh/2;
       }
+
+    } else if(pos === 'bottom-left'){
+      // Place box BELOW and to the LEFT of target — for topbar-right buttons
+      top  = r.bottom + pad;
+      left = r.right - bw;  // right-align box with target's right edge
+      if(top + bh > vh - pad) top = r.top - bh - pad;
       box.style.top  = clampY(top) + 'px';
       box.style.left = clampX(left) + 'px';
     }
@@ -1858,7 +1861,7 @@ function tutRestart(){
 
 // Auto-start on first visit
 // Versioned key — bump TUT_VERSION to reset tutorial for all users
-const TUT_VERSION = 'v4';
+const TUT_VERSION = 'v6';
 const TUT_KEY = 'tutDone_' + TUT_VERSION;
 
 function tutInit(){
@@ -2337,19 +2340,38 @@ updateRunBtnLabel = function(){
   else                  lbl.textContent = T.analyseN(filled);
 };
 
-// Override tutRender to use translated steps
+// Override tutRender to use translated steps (guest only — admin uses TUT_STEPS directly)
 const _origTutRender = tutRender;
 tutRender = function(){
-  const steps = TRANSLATIONS[currentLang].tutSteps;
-  const s     = steps[tutStep];
+  const step = TUT_STEPS[tutStep];
+  if(!step) return;
+
+  // Admin always uses TUT_STEPS_ADMIN text directly — no translation override
+  // Guest uses TRANSLATIONS for bilingual support
+  let title = step.title;
+  let body  = step.body;
+  let isLast = step.isLast || false;
+
+  if(CURRENT_ROLE !== 'admin'){
+    const steps = TRANSLATIONS[currentLang].tutSteps;
+    const ts    = steps[tutStep];
+    if(ts){
+      title  = ts.title;
+      body   = ts.body;
+      isLast = ts.isLast || false;
+    }
+  }
+
   document.getElementById('tut-badge').textContent  = tutStep + 1;
-  document.getElementById('tut-title').textContent  = s.title;
-  document.getElementById('tut-body').textContent   = s.body;
-  document.getElementById('tut-next-btn').textContent = s.isLast ? (currentLang === 'tl' ? 'Magsimula ✓' : 'Get started \u2713') : (currentLang === 'tl' ? 'Susunod \u2192' : 'Next \u2192');
+  document.getElementById('tut-title').textContent  = title;
+  document.getElementById('tut-body').textContent   = body;
+  document.getElementById('tut-next-btn').textContent = isLast
+    ? (currentLang === 'tl' ? 'Magsimula ✓' : 'Get started ✓')
+    : (currentLang === 'tl' ? 'Susunod →' : 'Next →');
   tutBuildDots();
-  if(TUT_STEPS[tutStep] && TUT_STEPS[tutStep].scrollTo) tutScrollSidebarToTarget(TUT_STEPS[tutStep].scrollTo);
-  tutHighlight(TUT_STEPS[tutStep] ? TUT_STEPS[tutStep].target : null);
-  tutPosition(TUT_STEPS[tutStep] ? TUT_STEPS[tutStep].target : null, TUT_STEPS[tutStep] ? TUT_STEPS[tutStep].pos : 'center');
+  if(step.scrollTo) tutScrollSidebarToTarget(step.scrollTo);
+  tutHighlight(step.target || null);
+  tutPosition(step.target || null, step.pos || 'center');
 };
 
 // Override openTips to store provId for language updates
