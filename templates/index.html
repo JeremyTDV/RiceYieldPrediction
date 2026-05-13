@@ -859,9 +859,9 @@ html.light .mobile-legend{background:var(--ink2);border-color:var(--border);}
             <div class="ig"><label data-en="Temperature (°C)" data-tl="Temperatura (°C)">Temperature (°C)</label>
               <input type="number" id="g-temp" value="27.5" step="0.1"><div class="hint">Optimal 25–28 °C</div></div>
             <div class="ig"><label data-en="Rainfall (mm)" data-tl="Pag-ulan (mm)">Rainfall (mm)</label>
-              <input type="number" id="g-rain" value="2100" step="10"><div class="hint">Range 1600–2700</div></div>
-            <div class="ig"><label data-en="Soil Moisture (%)" data-tl="Kahalumigmigan ng Lupa (%)">Soil Moisture (%)</label>
-              <input type="number" id="g-moist" value="65" step="1"><div class="hint">Optimal 60–75 %</div></div>
+              <input type="number" id="g-rain" value="2100" step="10" oninput="autoCalcMoisture('g-rain','g-moist')"><div class="hint">Range 1600–2700 — auto-filled from Soil Moisture</div></div>
+            <div class="ig"><label data-en="Soil Moisture (%)" data-tl="Kahalumigmigan ng Lupa (%)">Soil Moisture (%) <span id="g-moist-badge" style="font-size:9px;background:#4a9e6b;color:#fff;border-radius:3px;padding:1px 5px;margin-left:4px;vertical-align:middle;">auto</span></label>
+              <input type="number" id="g-moist" value="65" step="1" title="Auto-filled from Rainfall — or type to set Rainfall" oninput="autoCalcRainfall('g-moist','g-rain')"><div class="hint">Optimal 60–75 % — auto-filled from Rainfall</div></div>
             <div class="ig"><label data-en="Fertilizer (kg/ha)" data-tl="Pataba (kg/ha)">Fertilizer (kg/ha)</label>
               <input type="number" id="g-fert" value="150" step="1"><div class="hint">Range 60–200 kg/ha</div></div>
             <div class="ig"><label data-en="Disease Severity (0-5)" data-tl="Kalubhaan ng Sakit (0-5)">Disease Severity (0-5)</label>
@@ -1105,9 +1105,9 @@ PROVINCES.forEach((p,i) => {
       <div class="ig"><label>Avg Temp (°C)</label>
         <input type="number" id="${p.id}-temp" placeholder="e.g. 27.5" step="0.1"><div class="hint">25–30 °C</div></div>
       <div class="ig"><label>Rainfall (mm)</label>
-        <input type="number" id="${p.id}-rain" placeholder="e.g. 2100" step="10"><div class="hint">1600–2700 mm</div></div>
-      <div class="ig"><label data-en="Soil Moisture (%)" data-tl="Kahalumigmigan ng Lupa (%)">Soil Moisture (%)</label>
-        <input type="number" id="${p.id}-moist" placeholder="e.g. 65" step="1"><div class="hint">50–80 %</div></div>
+        <input type="number" id="${p.id}-rain" placeholder="e.g. 2100" step="10" oninput="autoCalcMoisture('${p.id}-rain','${p.id}-moist')"><div class="hint">1600–2700 mm — auto-filled from Soil Moisture</div></div>
+      <div class="ig"><label data-en="Soil Moisture (%)" data-tl="Kahalumigmigan ng Lupa (%)">Soil Moisture (%) <span style="font-size:9px;background:#4a9e6b;color:#fff;border-radius:3px;padding:1px 5px;margin-left:4px;vertical-align:middle;">auto</span></label>
+        <input type="number" id="${p.id}-moist" placeholder="e.g. 65" step="1" title="Auto-filled from Rainfall — or type to set Rainfall" oninput="autoCalcRainfall('${p.id}-moist','${p.id}-rain')"><div class="hint">50–80 % — auto-filled from Rainfall</div></div>
       <div class="ig"><label data-en="Fertilizer (kg/ha)" data-tl="Pataba (kg/ha)">Fertilizer (kg/ha)</label>
         <input type="number" id="${p.id}-fert" placeholder="e.g. 150" step="1"><div class="hint">60–200 kg/ha</div></div>
       <div class="ig"><label data-en="Disease Severity (0-5)" data-tl="Kalubhaan ng Sakit (0-5)">Disease Severity (0-5)</label>
@@ -1167,6 +1167,33 @@ function setTab(id){
     document.getElementById(`card-${p.id}`).classList.toggle('active',p.id===id);
   });
 }
+
+/* ── Rainfall ↔ Soil Moisture auto-calculation ──────────────────────────
+   Formula derived from CALABARZON rice dataset (linear regression):
+     soil_moisture (%) = 0.010349 * rainfall_mm + 41.25
+     rainfall_mm = (soil_moisture - 41.25) / 0.010349   [inverse]
+   Both clamped to their valid input ranges.
+   Fields remain editable — users can override anytime.
+──────────────────────────────────────────────────────────────────────── */
+function autoCalcMoisture(rainId, moistId) {
+  const rainVal = parseFloat(document.getElementById(rainId).value);
+  const moistEl = document.getElementById(moistId);
+  if (isNaN(rainVal) || !moistEl) return;
+  const raw = 0.010349 * rainVal + 41.25;
+  const clamped = Math.min(80, Math.max(50, Math.round(raw * 10) / 10));
+  moistEl.value = clamped.toFixed(1);
+}
+
+function autoCalcRainfall(moistId, rainId) {
+  const moistVal = parseFloat(document.getElementById(moistId).value);
+  const rainEl = document.getElementById(rainId);
+  if (isNaN(moistVal) || !rainEl) return;
+  const raw = (moistVal - 41.25) / 0.010349;
+  const clamped = Math.min(2700, Math.max(1600, Math.round(raw)));
+  rainEl.value = clamped;
+}
+
+
 function applyGlobal(){
   if(!validateGlobalInputs()){
     return;
@@ -1894,10 +1921,10 @@ tutEnd = function(){
 };
 
 if(document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', tutInit);
+  document.addEventListener('DOMContentLoaded', function(){ tutInit(); autoCalcMoisture('g-rain','g-moist'); });
 } else {
-  // DOM already ready
   tutInit();
+  autoCalcMoisture('g-rain','g-moist');
 }
 
 
